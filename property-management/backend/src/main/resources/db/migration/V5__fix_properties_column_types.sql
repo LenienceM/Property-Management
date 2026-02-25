@@ -1,0 +1,2 @@
+ALTER TABLE properties
+ALTER COLUMN location TYPE VARCHAR(255);

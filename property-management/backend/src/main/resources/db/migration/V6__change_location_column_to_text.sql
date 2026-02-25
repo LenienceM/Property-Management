@@ -1,0 +1,6 @@
+ALTER TABLE properties
+ALTER COLUMN location TYPE TEXT
+USING location::TEXT;
+
+ALTER TABLE properties
+ALTER COLUMN location SET NOT NULL;

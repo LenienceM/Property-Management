@@ -1,0 +1,2 @@
+ALTER TABLE properties
+ADD COLUMN suburb VARCHAR(255);
