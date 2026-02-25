@@ -4,7 +4,7 @@
 
 A full-stack rental property management platform built with Spring Boot and React.
 
-This project demonstrates secure JWT authentication, role-based authorisation, database migration management with Flyway, environment-based configuration, and Docker containerisation. It reflects real-world backend architecture practices including layered design, profile-based configuration, and secure secret handling.
+This project demonstrates secure JWT authentication, role-based authorisation, database migration management with Flyway, nvironment-based configuration, and Docker containerisation. It reflects real-world backend architecture practices including layered design, profile-based configuration, and secure secret handling.
 
 ## Project Overview
 
@@ -38,13 +38,13 @@ A scalable web platform that streamlines property searching for users and simpli
 The application follows an MVC architecture to ensure maintainability and separation of concerns.
 
 * **Frontend:** React + TypeScript + Tailwind CSS
-  ↓ *(REST API / Fetch API)*
+   *(REST API / Fetch API)*
 * **Backend Controllers:** Spring Boot / Java 21
-  ↓
+  
 * **Service Layer:** Business Logic & Security
-  ↓
+  
 * **Repository Layer:** Spring Data JPA
-  ↓
+  
 * **Database:** PostgreSQL (managed via Flyway)
 
 ### Backend Structure
