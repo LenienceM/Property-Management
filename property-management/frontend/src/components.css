@@ -1,0 +1,15 @@
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-secondary text-black rounded font-semibold
+           hover:bg-[#B79424] transition;
+  }
+
+  .btn-outline {
+    @apply px-6 py-3 border border-secondary text-secondary
+           hover:bg-secondary hover:text-black transition;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100;
+  }
+}

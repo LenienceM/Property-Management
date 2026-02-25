@@ -1,0 +1,64 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../api/auth";
+
+export default function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const res = await auth.login({ username, password });
+
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("role", res.role); // ADMIN | USER
+
+      navigate("/properties", { replace: true });
+    } catch {
+      setError("Invalid username or password");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded shadow-md w-80 flex flex-col gap-4"
+      >
+        <h2 className="text-2xl font-semibold text-center">Login</h2>
+
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          className="border px-3 py-2 rounded"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="border px-3 py-2 rounded"
+        />
+
+        <button
+          type="submit"
+          className="bg-[#C9A24D] text-black py-2 rounded hover:bg-[#B79424]"
+        >
+          Login
+        </button>
+      </form>
+    </div>
+  );
+}
