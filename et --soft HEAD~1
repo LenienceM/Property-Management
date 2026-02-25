@@ -1,0 +1,130 @@
+[33mcommit 98b534c1c01726803b8cdb5728f5949fdd32a565[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Lenience Moyo <Lenience.moyo@gmail.com>
+Date:   Wed Feb 25 12:57:59 2026 +0200
+
+    chore: reorganise project structure and rename packages
+
+[1mdiff --git a/my-react-router-app/.dockerignore b/my-react-router-app/.dockerignore[m
+[1mdeleted file mode 100644[m
+[1mindex 9b8d514..0000000[m
+[1m--- a/my-react-router-app/.dockerignore[m
+[1m+++ /dev/null[m
+[36m@@ -1,4 +0,0 @@[m
+[31m-.react-router[m
+[31m-build[m
+[31m-node_modules[m
+[31m-README.md[m
+\ No newline at end of file[m
+[1mdiff --git a/my-react-router-app/.gitignore b/my-react-router-app/.gitignore[m
+[1mdeleted file mode 100644[m
+[1mindex 039ee62..0000000[m
+[1m--- a/my-react-router-app/.gitignore[m
+[1m+++ /dev/null[m
+[36m@@ -1,7 +0,0 @@[m
+[31m-.DS_Store[m
+[31m-.env[m
+[31m-/node_modules/[m
+[31m-[m
+[31m-# React Router[m
+[31m-/.react-router/[m
+[31m-/build/[m
+[1mdiff --git a/my-react-router-app/Dockerfile b/my-react-router-app/Dockerfile[m
+[1mdeleted file mode 100644[m
+[1mindex 207bf93..0000000[m
+[1m--- a/my-react-router-app/Dockerfile[m
+[1m+++ /dev/null[m
+[36m@@ -1,22 +0,0 @@[m
+[31m-FROM node:20-alpine AS development-dependencies-env[m
+[31m-COPY . /app[m
+[31m-WORKDIR /app[m
+[31m-RUN npm ci[m
+[31m-[m
+[31m-FROM node:20-alpine AS production-dependencies-env[m
+[31m-COPY ./package.json package-lock.json /app/[m
+[31m-WORKDIR /app[m
+[31m-RUN npm ci --omit=dev[m
+[31m-[m
+[31m-FROM node:20-alpine AS build-env[m
+[31m-COPY . /app/[m
+[31m-COPY --from=development-dependencies-env /app/node_modules /app/node_modules[m
+[31m-WORKDIR /app[m
+[31m-RUN npm run build[m
+[31m-[m
+[31m-FROM node:20-alpine[m
+[31m-COPY ./package.json package-lock.json /app/[m
+[31m-COPY --from=production-dependencies-env /app/node_modules /app/node_modules[m
+[31m-COPY --from=build-env /app/build /app/build[m
+[31m-WORKDIR /app[m
+[31m-CMD ["npm", "run", "start"][m
+\ No newline at end of file[m
+[1mdiff --git a/my-react-router-app/README.md b/my-react-router-app/README.md[m
+[1mdeleted file mode 100644[m
+[1mindex 5c4780a..0000000[m
+[1m--- a/my-react-router-app/README.md[m
+[1m+++ /dev/null[m
+[36m@@ -1,87 +0,0 @@[m
+[31m-# Welcome to React Router![m
+[31m-[m
+[31m-A modern, production-ready template for building full-stack React applications using React Router.[m
+[31m-[m
+[31m-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)[m
+[31m-[m
+[31m-## Features[m
+[31m-[m
+[31m-- 🚀 Server-side rendering[m
+[31m-- ⚡️ Hot Module Replacement (HMR)[m
+[31m-- 📦 Asset bundling and optimization[m
+[31m-- 🔄 Data loading and mutations[m
+[31m-- 🔒 TypeScript by default[m
+[31m-- 🎉 TailwindCSS for styling[m
+[31m-- 📖 [React Router docs](https://reactrouter.com/)[m
+[31m-[m
+[31m-## Getting Started[m
+[31m-[m
+[31m-### Installation[m
+[31m-[m
+[31m-Install the dependencies:[m
+[31m-[m
+[31m-```bash[m
+[31m-npm install[m
+[31m-```[m
+[31m-[m
+[31m-### Development[m
+[31m-[m
+[31m-Start the development server with HMR:[m
+[31m-[m
+[31m-```bash[m
+[31m-npm run dev[m
+[31m-```[m
+[31m-[m
+[31m-Your application will be available at `http://localhost:5173`.[m
+[31m-[m
+[31m-## Building for Production[m
+[31m-[m
+[31m-Create a production build:[m
+[31m-[m
+[31m-```bash[m
+[31m-npm run build[m
+[31m-```[m
+[31m-[m
+[31m-## Deployment[m
+[31m-[m
+[31m-### Docker Deployment[m
+[31m-[m
+[31m-To build and run using Docker:[m
+[31m-[m
+[31m-```bash[m
+[31m-docker build -t my-app .[m
+[31m-[m
+[31m-# Run the container[m
+[31m-docker run -p 3000:3000 my-app[m
+[31m-```[m
+[31m-[m
+[31m-The containerized application can be deployed to any platform that supports Docker, including:[m
+[31m-[m
+[31m-- AWS ECS[m
+[31m-- Google Cloud Run[m
+[31m-- Azure Container Apps[m
+[31m-- Digital Ocean App Platform[m
+[31m-- Fly.io[m
+[31m-- 
