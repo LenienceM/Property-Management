@@ -5,85 +5,76 @@ import com.Thuba.propertymanagement.model.Property;
 import com.Thuba.propertymanagement.model.PropertyImage;
 import com.Thuba.propertymanagement.model.PropertyStatus;
 import com.Thuba.propertymanagement.repository.PropertyRepository;
-import com.Thuba.propertymanagement.specification.PropertySpecifications;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import org.springframework.beans.factory.annotation.Value;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
 public class PropertyService {
 
-    private static final Path UPLOAD_DIR =
-            Paths.get(System.getProperty("user.dir"), "uploads");
-
     private final PropertyRepository repo;
+    private final S3Client s3Client;
 
-    public Page<PropertyDto> findActive(
-            // String suburb,
-            Integer bedrooms,
-            Double minPrice,
-            Double maxPrice,
-            Pageable pageable
-    ) {
-        return repo.findActiveFiltered(
-                PropertyStatus.ACTIVE,
-                //suburb,
-                bedrooms,
-                minPrice,
-                maxPrice,
-                pageable
-        ).map(this::toDto);
+    @Value("${aws.s3.bucket}")
+    private String bucketName;
+
+    @Value("${aws.s3.region}")
+    private String region;
+
+
+    /**
+     * Generate a pre-signed URL valid for 24 hours.
+     */
+    public String generatePresignedUrl(String key) {
+        try (S3Presigner presigner = S3Presigner.builder()
+                .credentialsProvider(s3Client.serviceClientConfiguration().credentialsProvider())
+                .region(s3Client.serviceClientConfiguration().region())
+                .build()) {
+
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofHours(24))
+                    .getObjectRequest(getObjectRequest)
+                    .build();
+
+            URL url = presigner.presignGetObject(presignRequest).url();
+            return url.toString();
+        }
     }
 
-    public Page<PropertyDto> searchActive(
-            String suburb,
-            Integer bedrooms,
-            Double minPrice,
-            Double maxPrice,
-            Pageable pageable
-    ) {
-        return repo.searchActive(
-                PropertyStatus.ACTIVE,
-                suburb,
-                bedrooms,
-                minPrice,
-                maxPrice,
-                pageable
-        ).map(this::toDto);
+    public Page<PropertyDto> findActive(Integer bedrooms, Double minPrice, Double maxPrice, Pageable pageable) {
+        return repo.findActiveFiltered(PropertyStatus.ACTIVE, bedrooms, minPrice, maxPrice, pageable)
+                .map(this::toDto);
     }
 
-    public Page<PropertyDto> findAll(
-            String suburb,
+    public Page<PropertyDto> searchActive(String suburb, Integer bedrooms, Double minPrice, Double maxPrice, Pageable pageable) {
+        return repo.searchActive(PropertyStatus.ACTIVE, suburb, bedrooms, minPrice, maxPrice, pageable)
+                .map(this::toDto);
+    }
 
-            Integer bedrooms,
-            Double minPrice,
-            Double maxPrice,
-            Pageable pageable
-    ) {
-        return repo.searchActive(
-                PropertyStatus.ACTIVE,
-                suburb,
-                bedrooms,
-                minPrice,
-                maxPrice,
-                pageable
-        ).map(this::toDto);
+    public Page<PropertyDto> findAll(String suburb, Integer bedrooms, Double minPrice, Double maxPrice, Pageable pageable) {
+        return repo.searchActive(PropertyStatus.ACTIVE, suburb, bedrooms, minPrice, maxPrice, pageable)
+                .map(this::toDto);
     }
 
     public Property findEntity(Long id) {
@@ -107,23 +98,82 @@ public class PropertyService {
                 .build();
 
         if (property.getSuburb() != null) {
-            property.setSuburb(
-                    property.getSuburb().trim().toLowerCase()
-            );
+            property.setSuburb(property.getSuburb().trim().toLowerCase());
         }
 
-        Property saved = repo.save(property);
-        return toDto(saved);
+        return toDto(repo.save(property));
+    }
+
+    public void archive(Long id) {
+        Property property = findEntity(id);
+        property.setStatus(PropertyStatus.ARCHIVED);
+        repo.save(property);
     }
 
     public void restore(Long id) {
-        Property property = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
-
+        Property property = findEntity(id);
         property.setStatus(PropertyStatus.ACTIVE);
         repo.save(property);
     }
 
+    public void delete(Long id) {
+        repo.deleteById(id);
+    }
+
+    public Page<PropertyDto> getActiveProperties(Pageable pageable) {
+        return repo.findByStatus(PropertyStatus.ACTIVE, pageable)
+                .map(this::toDto);
+    }
+
+    public Page<Property> getPropertiesByStatus(List<PropertyStatus> statuses, String suburb, Integer bedrooms,
+                                                BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        return repo.findByStatusIn(statuses, pageable);
+    }
+
+    public Property updateStatus(Long id, PropertyStatus status) {
+        Property property = findEntity(id);
+        property.setStatus(status);
+        return repo.save(property);
+    }
+
+    // ---------------- Image Handling ----------------
+
+    public PropertyDto uploadPropertyImage(List<MultipartFile> files, Long propertyId) throws IOException {
+
+        Property property =repo.findById(propertyId)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        for (MultipartFile file : files) {
+
+            String key = "properties/" + propertyId + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+
+            PutObjectRequest putRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(
+                    putRequest,
+                    software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes())
+            );
+
+            String imageUrl = s3Client.utilities()
+                    .getUrl(builder -> builder.bucket(bucketName).key(key))
+                    .toExternalForm();
+
+            PropertyImage image = new PropertyImage();
+            image.setProperty(property);
+            //image.setFilename(imageUrl);
+            image.setFilename(key);
+
+            property.getImages().add(image);
+        }
+
+        repo.save(property);
+
+        return toDto(property);
+    }
 
     public PropertyDto toDto(Property property) {
         PropertyDto dto = new PropertyDto();
@@ -136,106 +186,12 @@ public class PropertyService {
         dto.setBathrooms(property.getBathrooms());
         dto.setDescription(property.getDescription());
         dto.setStatus(property.getStatus());
+
         dto.setImageUrls(
                 property.getImages().stream()
-                        .map(img ->
-                                "/api/properties/" +
-                                        property.getId() +
-                                        "/images/" +
-                                        img.getId()
-                        )
+                        .map(img -> "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + img.getFilename())
                         .toList()
         );
-
         return dto;
-    }
-
-    public void archive(Long id) {
-        Property property = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
-
-        property.setStatus(PropertyStatus.ARCHIVED);
-        repo.save(property);
-    }
-
-    public Page<PropertyDto> getActiveProperties(Pageable pageable) {
-        return repo.findByStatus(PropertyStatus.ACTIVE, pageable)
-                .map(this::toDto);
-    }
-
-    public void delete(Long id) {
-        repo.deleteById(id);
-    }
-
-    public PropertyDto uploadImages(Long id, List<MultipartFile> files) {
-        Property property = findEntity(id);
-
-        try {
-            Files.createDirectories(UPLOAD_DIR);
-
-            for (MultipartFile file : files) {
-                String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
-                Files.copy(
-                        file.getInputStream(),
-                        UPLOAD_DIR.resolve(filename),
-                        StandardCopyOption.REPLACE_EXISTING
-                );
-                System.out.println("Saving image: " + filename);
-
-                property.getImages().add(
-                        PropertyImage.builder()
-                                .filename(filename)
-                                .property(property)
-                                .build()
-                );
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Image upload failed", e);
-        }
-        return toDto(repo.save(property));
-    }
-
-    public Resource loadImage(Long propertyId, Long imageId) throws IOException {
-        Property property = findEntity(propertyId);
-
-        PropertyImage image = property.getImages()
-                .stream()
-                .filter(i -> i.getId().equals(imageId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Image not found"));
-
-        Path file = UPLOAD_DIR.resolve(image.getFilename());
-
-        if (!Files.exists(file)) {
-            throw new RuntimeException("Image file not found on disk: " + file);
-        }
-
-        return new UrlResource(file.toUri());
-    }
-
-    public Page<Property> getPropertiesByStatus(
-            List<PropertyStatus> statuses,
-            String suburb,
-            Integer bedrooms,
-            BigDecimal minPrice,
-            BigDecimal maxPrice,
-            Pageable pageable
-    ) {
-        Specification<Property> spec = Specification
-                .where(PropertySpecifications.hasStatusIn(statuses))
-                .and(PropertySpecifications.hasSuburb(suburb))
-                .and(PropertySpecifications.hasBedrooms(bedrooms))
-                .and(PropertySpecifications.minPrice(minPrice))
-                .and(PropertySpecifications.maxPrice(maxPrice));
-
-        return repo.findByStatusIn(statuses, pageable);
-    }
-
-    public Property updateStatus(Long id, PropertyStatus status) {
-        Property property = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
-
-        property.setStatus(status);
-        return repo.save(property);
     }
 }

@@ -51,18 +51,24 @@ useEffect(() => {
 const activeImage =
   property.imageUrls?.[activeIndex];
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-2 gap-10">
+   <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-2 gap-10">
      
 
      {/* 🖼 Image Gallery */}
 <div className="relative">
   {/* Main Image */}
   <div className="relative rounded-lg overflow-hidden border mb-4">
-    <img
-      src={imageUrl(property.imageUrls?.[activeIndex])}
-      alt={property.title}
-      className="w-full h-[420px] object-cover"
-    />
+ 
+
+
+    const activeImage = property.imageUrls?.[activeIndex];
+
+<img
+  key={activeImage}
+  src={imageUrl(activeImage)}
+  alt={property.title}
+  className="w-full h-[420px] object-cover"
+/>
 
     {/* Left Arrow */}
     {property.imageUrls.length > 1 && (
@@ -128,7 +134,6 @@ const activeImage =
         </div>
 
         <p className="mt-6 text-gray-600">{property.description}</p>
-
         
       </div>
 

@@ -81,11 +81,13 @@ public class PropertyController {
     public PropertyDto uploadImages(
             @PathVariable Long id,
             @RequestParam("files") List<MultipartFile> files
-    ) {
-        return service.uploadImages(id, files);
+    ) throws IOException {
+        return service.uploadPropertyImage(files, id);
     }
 
-    @GetMapping("/{propertyId}/images/{imageId}")
+
+
+    /*@GetMapping("/{propertyId}/images/{imageId}")
     public ResponseEntity<Resource> getImage(
             @PathVariable Long propertyId,
             @PathVariable Long imageId
@@ -99,7 +101,7 @@ public class PropertyController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(image);
     }
-
+*/
     @PutMapping("/{id}/archive")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> archive(@PathVariable Long id) {
@@ -136,4 +138,6 @@ public class PropertyController {
                 )
                 .map(service::toDto);
     }
+
+    
 }
