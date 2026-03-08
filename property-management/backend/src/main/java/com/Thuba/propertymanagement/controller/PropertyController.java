@@ -85,23 +85,6 @@ public class PropertyController {
         return service.uploadPropertyImage(files, id);
     }
 
-
-
-    /*@GetMapping("/{propertyId}/images/{imageId}")
-    public ResponseEntity<Resource> getImage(
-            @PathVariable Long propertyId,
-            @PathVariable Long imageId
-    ) throws IOException {
-
-        Resource image = service.loadImage(propertyId, imageId);
-
-        String contentType = Files.probeContentType(image.getFile().toPath());
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(image);
-    }
-*/
     @PutMapping("/{id}/archive")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> archive(@PathVariable Long id) {
@@ -138,6 +121,4 @@ public class PropertyController {
                 )
                 .map(service::toDto);
     }
-
-    
 }
