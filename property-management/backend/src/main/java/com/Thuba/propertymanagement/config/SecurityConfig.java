@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import java.util.List;
 
 @Configuration
@@ -32,38 +33,67 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable()).cors(cors -> {
-                }).authorizeHttpRequests(auth -> auth
 
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(auth -> auth
+
+                        // authentication endpoints
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // admin
-                        .requestMatchers("/api/properties/admin/**").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
-                        // public
-                        .requestMatchers(HttpMethod.GET, "/api/properties/*/images/*").permitAll()
+                        // public property access
                         .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/properties/*/images/*").permitAll()
+
+                        // admin endpoints
+                        .requestMatchers("/api/properties/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
+
+                        // everything else requires authentication
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "https://pelicanproperties.com",
+                "https://www.pelicanproperties.com"
+        ));
+
+        config.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "OPTIONS"
+        ));
+
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
+
         return source;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
         return config.getAuthenticationManager();
     }
 
@@ -72,3 +102,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
