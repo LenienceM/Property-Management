@@ -10,8 +10,22 @@ export default function PropertyDetail() {
   const [property, setProperty] = useState<Property | null>(null);
   //const [activeImage, setActiveImage] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+
+  const handleArchive = async () => {
+    if (!property) return;
+
+    await fetch(
+      `${API_BASE_URL}/properties/${property.id}/archive`, // UPDATED URL
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    setProperty({ ...property, status: "ARCHIVED" });
+  };
 
   useEffect(() => {
     // UPDATED URL
@@ -58,21 +72,15 @@ export default function PropertyDetail() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [property]);
 
-
   if (!property) return <p className="p-6">Loading property…</p>;
   const activeImage =
     property.imageUrls?.[activeIndex];
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-
-
-
-
       {/* 🖼 Image Gallery */}
       <div className="relative">
         <div className="relative rounded-lg overflow-hidden border mb-4">
-          {/* Remove the extra const declaration from here */}
           <img
             key={activeImage}
             src={imageUrl(activeImage)}
@@ -147,38 +155,23 @@ export default function PropertyDetail() {
       {auth.isAdmin() && (
         <div className="flex gap-4 mt-8">
           {property.status === "ACTIVE" && (
+
             <button
-              onClick={async () => {
-
-                const handleArchive = async () => {
-                  if (!property) return;
-
-                  await fetch(
-                    `${API_BASE_URL}/properties/${property.id}/archive`, // UPDATED URL
-                    {
-                      method: "PUT",
-                      headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                      },
-                    }
-                  );
-                  setProperty({ ...property, status: "ARCHIVED" });
-                };
-                /*  await fetch(
-                    `http://localhost:8080/api/properties/${property.id}/archive`,
-                    {
-                      method: "PUT",
-                      headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                      },
-                    }
-                  );
-                  setProperty({ ...property, status: "ARCHIVED" });*/
-              }}
+              onClick={handleArchive}
               className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
             >
               Archive Property
             </button>
+            /*  await fetch(
+                `http://localhost:8080/api/properties/${property.id}/archive`,
+                {
+                  method: "PUT",
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                }
+              );
+              setProperty({ ...property, status: "ARCHIVED" });*/
           )}
         </div>
       )}

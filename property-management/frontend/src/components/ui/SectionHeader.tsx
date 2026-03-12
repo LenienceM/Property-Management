@@ -1,9 +1,19 @@
+import type { ReactNode } from "react"; // Ensure you use type-only import
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  backgroundImage?: string;
+  children?: ReactNode;
+}
+
 export default function SectionHeader({
   title,
   subtitle,
   backgroundImage,
   children,
 }: Props) {
+
   return (
     <section className="relative w-full h-[450px] md:h-[520px]">
 
@@ -20,7 +30,7 @@ export default function SectionHeader({
 
       <div className="relative z-10 h-full flex items-center justify-center text-center text-white">
 
-        
+
         <div className="max-w-3xl px-6">
           <h1 className="text-4xl md:text-5xl font-semibold tracking-wide">
             {title}
