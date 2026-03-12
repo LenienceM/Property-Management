@@ -30,23 +30,26 @@ export default function Properties() {
   const [priceRange, setPriceRange] = useState("");
   //const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("");
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
   const priceRanges: Record<
-  string,
-  { min?: number; max?: number }
+    string,
+    { min?: number; max?: number }
   > = {
-  UNDER_5: { max: 5000 },
-  "5_10": { min: 5000, max: 10000 },
-  "10_20": { min: 10000, max: 20000 },
-  OVER_20: { min: 20000 },
+    UNDER_5: { max: 5000 },
+    "5_10": { min: 5000, max: 10000 },
+    "10_20": { min: 10000, max: 20000 },
+    OVER_20: { min: 20000 },
   };
-  
-  // Fetch properties
+
+
   useEffect(() => {
     setLoading(true);
 
+    // Use your new config constant here!
+
     if (auth.isAdmin()) {
       fetch(
-        `http://localhost:8080/api/properties/admin?statuses=${status}&page=${page}&size=6`,
+        `${API_BASE_URL}/properties/admin?statuses=${status}&page=${page}&size=6`,
         { headers: { Authorization: `Bearer ${auth.token()}` } }
       )
         .then((res) => res.json())
@@ -57,19 +60,19 @@ export default function Properties() {
         .catch(() => setLoading(false));
     } else {
 
- const selectedRange = priceRanges[priceRange];
-const min = selectedRange?.min;
-const max = selectedRange?.max;
+      const selectedRange = priceRanges[priceRange];
+      const min = selectedRange?.min;
+      const max = selectedRange?.max;
 
-getProperties({
-  page,
-  size: 6,
-  suburb: suburb ? suburb.trim().toLowerCase() : undefined,
-  bedrooms: bedrooms ? Number(bedrooms) : undefined,
-  minPrice: min,
-  maxPrice: max,
-  sort: sort || undefined,
-})
+      getProperties({
+        page,
+        size: 6,
+        suburb: suburb ? suburb.trim().toLowerCase() : undefined,
+        bedrooms: bedrooms ? Number(bedrooms) : undefined,
+        minPrice: min,
+        maxPrice: max,
+        sort: sort || undefined,
+      })
         .then((res) => {
           setData(res);
           setLoading(false);
@@ -87,7 +90,7 @@ getProperties({
   const handleDelete = async (id: number) => {
     if (!auth.isAdmin()) return;
     try {
-      await fetch(`http://localhost:8080/api/properties/${id}`, {
+      await fetch(`${API_BASE_URL}/properties/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${auth.token()}` },
       });
@@ -102,7 +105,7 @@ getProperties({
   const handleArchive = async (id: number) => {
     if (!auth.isAdmin()) return;
     try {
-      await fetch(`http://localhost:8080/api/properties/${id}/archive`, {
+      await fetch(`${API_BASE_URL}/properties/${id}/archive`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${auth.token()}` },
       });
@@ -117,7 +120,7 @@ getProperties({
   const handleRestore = async (id: number) => {
     if (!auth.isAdmin()) return;
     try {
-      await fetch(`http://localhost:8080/api/properties/${id}/restore`, {
+      await fetch(`${API_BASE_URL}/properties/${id}/restore`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${auth.token()}` },
       });
@@ -129,8 +132,8 @@ getProperties({
     }
   };
 
-  return (    
-      <div className="min-h-screen bg-white">
+  return (
+    <div className="min-h-screen bg-white">
       {/* Hero */}
       <SectionHeader
         title="Our Properties"
@@ -147,25 +150,25 @@ getProperties({
         )}
       </SectionHeader>
 
-      {/* Filter Section */}  
+      {/* Filter Section */}
       <div className="relative">
-        <div className="absolute left-0 right-0 -top-10 z-20"> 
+        <div className="absolute left-0 right-0 -top-10 z-20">
 
-              <FilterBar
-                suburb={suburb}
-                setSuburb={setSuburb}
-                bedrooms={bedrooms}
-                setBedrooms={setBedrooms}
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
-                sort={sort}
-                setSort={setSort}
-              />       
-            
-                {auth.isAdmin() && <AdminToggle status={status} setStatus={setStatus} />}
-            
-          </div>
-      </div> 
+          <FilterBar
+            suburb={suburb}
+            setSuburb={setSuburb}
+            bedrooms={bedrooms}
+            setBedrooms={setBedrooms}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            sort={sort}
+            setSort={setSort}
+          />
+
+          {auth.isAdmin() && <AdminToggle status={status} setStatus={setStatus} />}
+
+        </div>
+      </div>
 
       {/* Properties Grid */}
       <Container>
@@ -175,7 +178,7 @@ getProperties({
           <p className="text-center py-20 text-gray-500">No properties found.</p>
         ) : (
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {data.content.map((p) => (
+            {data?.content.map((p) => (
               <PropertyCard
                 key={p.id}
                 property={p}
@@ -188,7 +191,8 @@ getProperties({
         )}
 
         {/* Pagination */}
-        {data?.totalPages > 1 && (
+
+        {(data?.totalPages ?? 0) > 1 && (
           <div className="flex justify-center items-center gap-6 mt-10 pb-20">
             <button
               disabled={page === 0}
@@ -201,15 +205,17 @@ getProperties({
               Page {data ? data.number + 1 : 1} of {data?.totalPages ?? 1}
             </span>
             <button
-              disabled={data ? page + 1 >= data.totalPages : true}
+              disabled={!data || page + 1 >= (data?.totalPages ?? 0)}
+
+              // disabled={data? page + 1 >= data?.totalPages : true}
               onClick={() => setPage((p) => p + 1)}
-              className="px-5 py-2 border rounded disabled:opacity-40 hover:bg-primary hover:text-white transition"              
+              className="px-5 py-2 border rounded disabled:opacity-40 hover:bg-primary hover:text-white transition"
             >
               Next
             </button>
-          </div>      
+          </div>
         )}
       </Container>
-     </div>
+    </div>
   );
 }

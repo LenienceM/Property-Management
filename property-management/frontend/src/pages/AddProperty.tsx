@@ -12,8 +12,8 @@ export default function AddProperty() {
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
   const [description, setDescription] = useState("");
-
   const navigate = useNavigate();
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +23,7 @@ export default function AddProperty() {
       const token = localStorage.getItem("token");
 
       // Create property
-      const res = await fetch("http://localhost:8080/api/properties", {
+      const res = await fetch(`${API_BASE_URL}/properties`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -53,7 +53,7 @@ export default function AddProperty() {
         images.forEach((img) => formData.append("files", img));
 
         const imgRes = await fetch(
-          `http://localhost:8080/api/properties/${property.id}/images`,
+          `${API_BASE_URL}/properties/${property.id}/images`,
           {
             method: "POST",
             headers: {

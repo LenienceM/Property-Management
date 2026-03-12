@@ -4,11 +4,9 @@
 
 @layer base {
 
-  
   html {
-  scroll-behavior: smooth;
-}
-
+    scroll-behavior: smooth;
+  }
 
   body {
     @apply bg-muted text-textDark font-sans;
