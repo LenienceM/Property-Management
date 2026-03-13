@@ -73,9 +73,11 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://pelicanpropertie.co.za",
+                "https://property-management-frontend-7gpl.onrender.com",
+                "https://pelicanproperties.co.za",
                 "https://www.pelicanproperties.co.za"
         ));
+
 
         config.setAllowedMethods(List.of(
                 "GET",
