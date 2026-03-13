@@ -1,18 +1,20 @@
 // src/utils/image.ts
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 /**
- * Extracts the filename from a full path or URL and 
- * returns the backend proxy URL for the image.
+ * Returns the direct S3 public URL for an image.
  */
 export const getPropertyImageUrl = (propertyId: number, rawPath?: string) => {
   if (!rawPath) return "/placeholder.jpg";
 
-  // If rawPath is "https://bucket.s3.com/folder/photo.jpg", 
-  // imageKey becomes "photo.jpg"
-  const imageKey = rawPath.includes("/")
-    ? rawPath.split("/").pop()
-    : rawPath;
+  // If the database already stored the full S3 URL, just use it
+  if (rawPath.startsWith("http")) {
+    return rawPath;
+  }
 
-  return `${API_BASE_URL}/api/properties/${propertyId}/images/${imageKey}`;
+  // Otherwise, construct it manually using your bucket and region info
+  const BUCKET_NAME = "lm-propertymanagement";
+  const REGION = "us-east-1";
+
+  // Format: https://BUCKET.s3.REGION.amazonaws.com/properties/ID/FILENAME
+  return `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/properties/${propertyId}/${rawPath}`;
 };

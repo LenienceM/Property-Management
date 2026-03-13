@@ -3,7 +3,7 @@ import type { Property } from "../types/Property";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 //export async function getProperties(page = 0, size = 6) {
- // return fetch(`${API_BASE}?page=${page}&size=${size}`).then(r => r.json());  
+// return fetch(`${API_BASE}?page=${page}&size=${size}`).then(r => r.json());  
 //}
 
 type PropertyQuery = {
@@ -52,10 +52,10 @@ export async function getAdminProperties(
 }
 
 export async function addProperty(property: Omit<Property, "id">) {
-if (!property.price || property.price <= 0) {
-  alert("Please enter a valid price");
-  return;
-}
+  if (!property.price || property.price <= 0) {
+    alert("Please enter a valid price");
+    return;
+  }
 
   return fetch(API_BASE_URL, {
     method: "POST",
@@ -111,14 +111,14 @@ export async function uploadImages(id: number, files: File[]) {
     body: formData,
   });
 
- // if (!res.ok) throw new Error("Failed to upload images");
+  // if (!res.ok) throw new Error("Failed to upload images");
 };
 
 export async function getArchivedProperties(page = 0, size = 9) {
   const token = localStorage.getItem("token");
 
   const res = await fetch(
-  //  `${API_BASE}/admin?status=ARCHIVED&page=${page}&size=${size}`,
+    //  `${API_BASE}/admin?status=ARCHIVED&page=${page}&size=${size}`,
     `${API_BASE_URL}/admin?statuses=ARCHIVED&page=${page}&size=${size}`,
 
     {
