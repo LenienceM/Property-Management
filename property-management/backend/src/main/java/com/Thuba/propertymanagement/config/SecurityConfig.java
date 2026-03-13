@@ -41,8 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/properties/admin/**").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/properties/*/images/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
-                        .anyRequest().authenticated()
-                        .anyRequest().authenticated()).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().authenticated())
+                        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
