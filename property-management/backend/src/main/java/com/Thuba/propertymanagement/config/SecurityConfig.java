@@ -26,7 +26,6 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-
     public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
@@ -39,10 +38,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/properties/*/images/**").permitAll().requestMatchers("/api/properties/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/properties/admin/**").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/properties/*/images/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
-
+                        .anyRequest().authenticated()
                         .anyRequest().authenticated()).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
