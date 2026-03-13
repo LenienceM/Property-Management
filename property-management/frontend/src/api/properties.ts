@@ -1,13 +1,9 @@
 import type { Property } from "../types/Property";
 
-const API_BASE = "http://localhost:8080/api/properties";
-
-
-
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 //export async function getProperties(page = 0, size = 6) {
- // return fetch(`${API_BASE}?page=${page}&size=${size}`).then(r => r.json());
-  
+ // return fetch(`${API_BASE}?page=${page}&size=${size}`).then(r => r.json());  
 //}
 
 type PropertyQuery = {
@@ -29,7 +25,7 @@ export async function getProperties(query: PropertyQuery = {}) {
     }
   });
 
-  const res = await fetch(`${API_BASE}?${params.toString()}`);
+  const res = await fetch(`${API_BASE_URL}?${params.toString()}`);
 
   if (!res.ok) {
     throw new Error(`Failed to load properties (${res.status})`);
@@ -37,10 +33,6 @@ export async function getProperties(query: PropertyQuery = {}) {
 
   return res.json();
 }
-
-
-
-
 
 export async function getAdminProperties(
   statuses: string[],
@@ -50,7 +42,7 @@ export async function getAdminProperties(
   const qs = statuses.map(s => `statuses=${s}`).join("&");
 
   return fetch(
-    `${API_BASE}/admin?${qs}&page=${page}&size=${size}`,
+    `${API_BASE_URL}/admin?${qs}&page=${page}&size=${size}`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -59,14 +51,13 @@ export async function getAdminProperties(
   ).then(r => r.json());
 }
 
-
 export async function addProperty(property: Omit<Property, "id">) {
 if (!property.price || property.price <= 0) {
   alert("Please enter a valid price");
   return;
 }
 
-  return fetch(API_BASE, {
+  return fetch(API_BASE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -77,7 +68,7 @@ if (!property.price || property.price <= 0) {
 }
 
 export async function archiveProperty(id: number) {
-  return fetch(`${API_BASE}/${id}/archive`, {
+  return fetch(`${API_BASE_URL}/${id}/archive`, {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -85,25 +76,9 @@ export async function archiveProperty(id: number) {
   });
 }
 
-/*export async function restoreProperty(id: number) {
-  const res = await fetch(
-    `${API_BASE}/${id}/${id}/restore`,
-    
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }
-  );
-
-  if (!res.ok) throw new Error("Failed to restore property");
-}
-*/
-
 export async function restoreProperty(id: number) {
   const res = await fetch(
-    `${API_BASE}/${id}/restore`,
+    `${API_BASE_URL}/${id}/restore`,
     {
       method: "PUT",
       headers: {
@@ -115,10 +90,8 @@ export async function restoreProperty(id: number) {
   if (!res.ok) throw new Error("Failed to restore property");
 }
 
-
-
 export async function deleteProperty(id: number) {
-  return fetch(`${API_BASE}/${id}`, {
+  return fetch(`${API_BASE_URL}/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -130,14 +103,13 @@ export async function uploadImages(id: number, files: File[]) {
   const formData = new FormData();
   files.forEach(f => formData.append("files", f));
 
-  return fetch(`${API_BASE}/${id}/images`, {
+  return fetch(`${API_BASE_URL}/${id}/images`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: formData,
   });
-
 
  // if (!res.ok) throw new Error("Failed to upload images");
 };
@@ -147,7 +119,7 @@ export async function getArchivedProperties(page = 0, size = 9) {
 
   const res = await fetch(
   //  `${API_BASE}/admin?status=ARCHIVED&page=${page}&size=${size}`,
-    `${API_BASE}/admin?statuses=ARCHIVED&page=${page}&size=${size}`,
+    `${API_BASE_URL}/admin?statuses=ARCHIVED&page=${page}&size=${size}`,
 
     {
       headers: {
@@ -167,7 +139,7 @@ export async function updatePropertyStatus(
   const token = localStorage.getItem("token");
 
   const res = await fetch(
-    `${API_BASE}/${id}/status?status=${status}`,
+    `${API_BASE_URL}/${id}/status?status=${status}`,
     {
       method: "PUT",
       headers: {
@@ -179,5 +151,3 @@ export async function updatePropertyStatus(
   if (!res.ok) throw new Error("Failed to update status");
   return res.json();
 }
-
-

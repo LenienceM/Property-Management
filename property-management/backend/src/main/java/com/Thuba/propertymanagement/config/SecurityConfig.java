@@ -40,23 +40,26 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(auth -> auth
 
-                        // authentication endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .authorizeHttpRequests(auth -> auth
+                                // 1. Auth is always first
+                                .requestMatchers("/api/auth/**").permitAll()
 
-                        // public property access
-                        .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/properties/*/images/*").permitAll()
+                                // 2. SPECIFIC image path first with double asterisk
+                                .requestMatchers(HttpMethod.GET, "/api/properties/*/images/**").permitAll()
 
-                        // admin endpoints
-                        .requestMatchers("/api/properties/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
+                                // 3. Admin restrictions BEFORE general public GET
+                                .requestMatchers("/api/properties/admin/**").hasRole("ADMIN")
 
-                        // everything else requires authentication
-                        .anyRequest().authenticated()
+                                // 4. General public GET
+                                .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
+
+                                // 5. Other Admin methods
+                                .requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
+
+                                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -70,7 +73,7 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://pelicanproperties.co.za",
+                "https://pelicanpropertie.co.za",
                 "https://www.pelicanproperties.co.za"
         ));
 

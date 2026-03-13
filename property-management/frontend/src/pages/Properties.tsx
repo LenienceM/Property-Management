@@ -22,7 +22,6 @@ export default function Properties() {
   const [data, setData] = useState<PageResponse<Property> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-
   const [status, setStatus] = useState<PropertyStatus>(PropertyStatus.ACTIVE);
   const [suburb, setSuburb] = useState("");
   const [bedrooms, setBedrooms] = useState("");
@@ -41,11 +40,8 @@ export default function Properties() {
     OVER_20: { min: 20000 },
   };
 
-
   useEffect(() => {
     setLoading(true);
-
-    // Use your new config constant here!
 
     if (auth.isAdmin()) {
       fetch(
