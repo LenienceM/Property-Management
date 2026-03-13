@@ -34,34 +34,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> {})
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+        http.csrf(csrf -> csrf.disable()).cors(cors -> {
+                }).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
 
-                        .authorizeHttpRequests(auth -> auth
-                                // 1. Auth is always first
-                                .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/properties/*/images/**").permitAll().requestMatchers("/api/properties/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
 
-                                // 2. SPECIFIC image path first with double asterisk
-                                .requestMatchers(HttpMethod.GET, "/api/properties/*/images/**").permitAll()
-
-                                // 3. Admin restrictions BEFORE general public GET
-                                .requestMatchers("/api/properties/admin/**").hasRole("ADMIN")
-
-                                // 4. General public GET
-                                .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
-
-                                // 5. Other Admin methods
-                                .requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
-
-                                .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().authenticated()).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -71,26 +53,10 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "https://property-management-frontend-7gpl.onrender.com",
-                "https://property-management.onrender.com",
-                "https://pelicanproperties.co.za",
-                "https://www.pelicanproperties.co.za"
-        ));
-
-
-        config.setAllowedMethods(List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "OPTIONS"
-        ));
-
+        config.setAllowedOrigins(List.of("http://localhost:5173", "https://property-management-frontend-7gpl.onrender.com", "https://property-management.onrender.com", "https://pelicanproperties.co.za", "https://www.pelicanproperties.co.za"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
@@ -98,8 +64,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-            throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
