@@ -77,13 +77,25 @@ public class PropertyController {
         );
     }
 
-    @PostMapping("/{id}/images")
+   /* @PostMapping("/{id}/images")
     public PropertyDto uploadImages(
             @PathVariable Long id,
             @RequestParam("files") List<MultipartFile> files
     ) throws IOException {
         return service.uploadPropertyImage(files, id);
     }
+*/
+   @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+   public PropertyDto uploadImages(
+           @PathVariable Long id,
+           @RequestPart("files") List<MultipartFile> files
+   ) throws IOException {
+
+       System.out.println("UPLOAD HIT ✅");
+       System.out.println("Files count: " + files.size());
+
+       return service.uploadPropertyImage(files, id);
+   }
 
     @PutMapping("/{id}/archive")
     @PreAuthorize("hasRole('ADMIN')")
