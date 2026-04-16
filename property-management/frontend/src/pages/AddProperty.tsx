@@ -64,8 +64,13 @@ export default function AddProperty() {
         );
 
         if (!imgRes.ok) {
-          const text = await imgRes.text();
-          console.error("Image upload error:", text);
+        //  const text = await imgRes.text();
+         // console.error("Image upload error:", text);
+            console.error("Status:", imgRes.status);
+
+            const text = await imgRes.text();
+            console.error("Body:", text || "EMPTY");
+
           throw new Error("Failed to upload images");
         }
       }
