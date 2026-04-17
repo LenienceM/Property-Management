@@ -26,7 +26,7 @@ export async function getProperties(query: PropertyQuery = {}) {
     }
   });
 
-  const res = await fetch(`${API_BASE_URL}/api/properties?${params.toString()}`);
+  const res = await fetch(`${API_BASE_URL}/properties?${params.toString()}`);
 
   if (!res.ok) {
     throw new Error(`Failed to load properties (${res.status})`);
