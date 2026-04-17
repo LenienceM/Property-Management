@@ -41,8 +41,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Explicitly permit pre-flight
-                        .requestMatchers(HttpMethod.POST, "/api/properties").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasAuthority("ADMIN")
+                       // .requestMatchers(HttpMethod.POST, "/api/properties").hasAuthority("ADMIN")
+                        //.requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
                         .anyRequest().authenticated()
                 )

@@ -44,14 +44,13 @@ public class PropertyController {
     }
 
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+   // @PreAuthorize("hasAuthority('ADMIN')")
+   // @PostMapping
+    //public ResponseEntity<PropertyDto> create(
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<PropertyDto> create(
-
-
-   // @PostMapping
-   // @PreAuthorize("hasRole('ADMIN')")
-   // public ResponseEntity<PropertyDto> create(
             @Valid @RequestBody PropertyDto dto
     ) {
         return ResponseEntity.ok(service.create(dto));
