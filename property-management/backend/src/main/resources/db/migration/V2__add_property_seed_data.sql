@@ -1,7 +1,7 @@
 INSERT INTO properties (
     title,
     price,
-    location,
+    suburb,
     bedrooms,
     bathrooms,
     description
