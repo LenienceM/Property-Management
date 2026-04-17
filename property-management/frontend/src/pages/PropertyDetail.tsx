@@ -15,7 +15,7 @@ export default function PropertyDetail() {
     if (!property) return;
 
     await fetch(
-      `${API_BASE_URL}/api/properties/${property.id}/archive`,
+      `${API_BASE_URL}/properties/${property.id}/archive`,
       {
         method: "PUT",
         headers: {
@@ -27,7 +27,7 @@ export default function PropertyDetail() {
   };
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/properties/${id}`)
+    fetch(`${API_BASE_URL}/properties/${id}`)
       .then(res => res.json())
       .then(data => {
         setProperty(data);

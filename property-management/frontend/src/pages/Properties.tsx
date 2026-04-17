@@ -45,7 +45,7 @@ export default function Properties() {
 
     if (auth.isAdmin()) {
       fetch(
-        `${API_BASE_URL}/api/properties/admin?statuses=${status}&page=${page}&size=6`,
+        `${API_BASE_URL}/properties/admin?statuses=${status}&page=${page}&size=6`,
         { headers: { Authorization: `Bearer ${auth.token()}` } }
       )
         .then((res) => res.json())
@@ -86,7 +86,7 @@ export default function Properties() {
   const handleDelete = async (id: number) => {
     if (!auth.isAdmin()) return;
     try {
-      await fetch(`${API_BASE_URL}/api/properties/${id}`, {
+      await fetch(`${API_BASE_URL}/properties/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${auth.token()}` },
       });
@@ -101,7 +101,7 @@ export default function Properties() {
   const handleArchive = async (id: number) => {
     if (!auth.isAdmin()) return;
     try {
-      await fetch(`${API_BASE_URL}/api/properties/${id}/archive`, {
+      await fetch(`${API_BASE_URL}/properties/${id}/archive`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${auth.token()}` },
       });
@@ -116,7 +116,7 @@ export default function Properties() {
   const handleRestore = async (id: number) => {
     if (!auth.isAdmin()) return;
     try {
-      await fetch(`${API_BASE_URL}/api/properties/${id}/restore`, {
+      await fetch(`${API_BASE_URL}/properties/${id}/restore`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${auth.token()}` },
       });
