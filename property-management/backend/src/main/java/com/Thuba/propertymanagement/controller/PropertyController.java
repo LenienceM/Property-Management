@@ -91,7 +91,7 @@ public class PropertyController {
            @RequestPart("files") List<MultipartFile> files
    ) throws IOException {
 
-       System.out.println("UPLOAD HIT ✅");
+       System.out.println("UPLOAD HIT");
        System.out.println("Files count: " + files.size());
 
        return service.uploadPropertyImage(files, id);
