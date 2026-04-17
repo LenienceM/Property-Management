@@ -23,7 +23,7 @@ export default function AddProperty() {
       const token = localStorage.getItem("token");
 
       // Create property
-      const res = await fetch(`${API_BASE_URL}/properties`, {
+      const res = await fetch(`${API_BASE_URL}/api/properties`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,6 +36,7 @@ export default function AddProperty() {
           bedrooms: Number(bedrooms),
           bathrooms: Number(bathrooms),
           description,
+          status: "ACTIVE", 
         }),
       });
 
@@ -53,7 +54,7 @@ export default function AddProperty() {
         images.forEach((img) => formData.append("files", img));
 
         const imgRes = await fetch(
-          `${API_BASE_URL}/properties/${property.id}/images`,
+          `${API_BASE_URL}/api/properties/${property.id}/images`,
           {
             method: "POST",
             headers: {
