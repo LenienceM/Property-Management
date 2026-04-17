@@ -33,22 +33,48 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(csrf -> csrf.disable()).cors(cors -> {
-                }).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
 
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Link your CORS bean here
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Explicitly permit pre-flight
+                        .requestMatchers(HttpMethod.POST, "/api/properties").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+
+
+        //.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+
+ //       http.csrf(csrf -> csrf.disable()).cors(cors -> {
+  //              }).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+ //               .authorizeHttpRequests(auth -> auth
+
+//                        .requestMatchers("/api/auth/**").permitAll()
                         //.requestMatchers("/api/properties/admin/**").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasRole("ADMIN")
+                      //  .requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN")
+                        //.requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasRole("ADMIN")
+
+ //                       .requestMatchers(HttpMethod.POST, "/api/properties").hasAuthority("ADMIN")
+ //                       .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasAuthority("ADMIN")
 
                         //.requestMatchers(HttpMethod.GET, "/api/properties/*/images/*").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
-                        .anyRequest().authenticated())
-                        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+  //                      .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
+ //                       .anyRequest().authenticated())
+ //                       .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
+
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
