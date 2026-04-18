@@ -33,12 +33,11 @@ export const auth = {
 */
 // src/api/auth.ts
 // Standardize this to the root URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 export const auth = {
   async login(credentials: { username: string; password: string }) {
-    // UPDATED: Added /api/auth/login to match your Spring Boot controller
-    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(credentials),
