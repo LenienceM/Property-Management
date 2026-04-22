@@ -43,11 +43,6 @@ public class PropertyController {
         return service.findById(id);
     }
 
-
-   // @PreAuthorize("hasAuthority('ADMIN')")
-   // @PostMapping
-    //public ResponseEntity<PropertyDto> create(
-
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<PropertyDto> create(
@@ -82,14 +77,6 @@ public class PropertyController {
         );
     }
 
-   /* @PostMapping("/{id}/images")
-    public PropertyDto uploadImages(
-            @PathVariable Long id,
-            @RequestParam("files") List<MultipartFile> files
-    ) throws IOException {
-        return service.uploadPropertyImage(files, id);
-    }
-*/
    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
    public PropertyDto uploadImages(
            @PathVariable Long id,

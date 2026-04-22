@@ -1,107 +1,78 @@
-package com.Thuba.propertymanagement.config;
+    package com.Thuba.propertymanagement.config;
 
-import com.Thuba.propertymanagement.security.JwtFilter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+    import com.Thuba.propertymanagement.security.JwtFilter;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.http.HttpMethod;
+    import org.springframework.security.authentication.AuthenticationManager;
+    import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+    import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+    import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+    import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+    import org.springframework.security.config.http.SessionCreationPolicy;
+    import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+    import org.springframework.security.crypto.password.PasswordEncoder;
+    import org.springframework.security.web.SecurityFilterChain;
+    import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+    import org.springframework.web.cors.CorsConfiguration;
+    import org.springframework.web.cors.CorsConfigurationSource;
+    import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+    import java.util.List;
 
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
-public class SecurityConfig {
+    @Configuration
+    @EnableWebSecurity
+    @EnableMethodSecurity
+    public class SecurityConfig {
 
-    private final JwtFilter jwtFilter;
-    public SecurityConfig(JwtFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
+        private final JwtFilter jwtFilter;
+        public SecurityConfig(JwtFilter jwtFilter) {
+            this.jwtFilter = jwtFilter;
+        }
+
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+            http
+                    .csrf(csrf -> csrf.disable())
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Link your CORS bean here
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/api/auth/**").permitAll()
+                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Explicitly permit pre-flight
+                            .requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
+                            .anyRequest().authenticated()
+                    )
+                    .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+            return http.build();
+        }
+
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+
+            CorsConfiguration config = new CorsConfiguration();
+
+            config.setAllowedOrigins(List.of("http://localhost:5173", "https://property-management-frontend-7gpl.onrender.com", "https://property-management.onrender.com", "https://pelicanproperties.co.za", "https://www.pelicanproperties.co.za"));
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            config.setAllowedHeaders(List.of("*"));
+            config.setAllowCredentials(true);
+            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            source.registerCorsConfiguration("/**", config);
+
+            return source;
+        }
+
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+            return config.getAuthenticationManager();
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
     }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Link your CORS bean here
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Explicitly permit pre-flight
-                       // .requestMatchers(HttpMethod.POST, "/api/properties").hasAuthority("ADMIN")
-                        //.requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-
-
-        //.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-
- //       http.csrf(csrf -> csrf.disable()).cors(cors -> {
-  //              }).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
- //               .authorizeHttpRequests(auth -> auth
-
-//                        .requestMatchers("/api/auth/**").permitAll()
-                        //.requestMatchers("/api/properties/admin/**").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN").requestMatchers(HttpMethod.POST, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.PUT, "/api/properties/**").hasRole("ADMIN").requestMatchers(HttpMethod.DELETE, "/api/properties/**").hasRole("ADMIN")
-                      //  .requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN")
-                        //.requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasRole("ADMIN")
-
- //                       .requestMatchers(HttpMethod.POST, "/api/properties").hasAuthority("ADMIN")
- //                       .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasAuthority("ADMIN")
-
-                        //.requestMatchers(HttpMethod.GET, "/api/properties/*/images/*").permitAll()
-  //                      .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
- //                       .anyRequest().authenticated())
- //                       .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
-
-
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(List.of("http://localhost:5173", "https://property-management-frontend-7gpl.onrender.com", "https://property-management.onrender.com", "https://pelicanproperties.co.za", "https://www.pelicanproperties.co.za"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-}
 
