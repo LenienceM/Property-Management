@@ -28,14 +28,7 @@ export function Navbar() {
         Contact
       </NavLink>
 
-      <NavLink
-        to="/signup"
-        onClick={() => setIsOpen(false)}
-        className="px-3 py-1 border border-[#C9A24D] text-[#C9A24D] rounded"
-      >
-        Signup
-      </NavLink>
-
+      
       {auth.isAdmin() && (
         <NavLink
           to="/properties/add"
