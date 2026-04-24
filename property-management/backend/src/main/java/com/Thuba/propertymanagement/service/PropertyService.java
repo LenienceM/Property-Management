@@ -6,23 +6,24 @@ import com.Thuba.propertymanagement.model.PropertyImage;
 import com.Thuba.propertymanagement.model.PropertyStatus;
 import com.Thuba.propertymanagement.repository.PropertyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import org.springframework.beans.factory.annotation.Value;
+
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
-import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +96,7 @@ public class PropertyService {
                 .bedrooms(dto.getBedrooms() == null ? 0 : dto.getBedrooms())
                 .description(dto.getDescription())
                 .status(PropertyStatus.ACTIVE)
+                .amenities(dto.getAmenities())
                 .build();
 
         if (property.getSuburb() != null) {
@@ -140,7 +142,7 @@ public class PropertyService {
 
     public PropertyDto uploadPropertyImage(List<MultipartFile> files, Long propertyId) throws IOException {
 
-        Property property =repo.findById(propertyId)
+        Property property = repo.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
         for (MultipartFile file : files) {
@@ -186,6 +188,7 @@ public class PropertyService {
         dto.setBathrooms(property.getBathrooms());
         dto.setDescription(property.getDescription());
         dto.setStatus(property.getStatus());
+        dto.setAmenities(property.getAmenities());
 
         dto.setImageUrls(
                 property.getImages().stream()

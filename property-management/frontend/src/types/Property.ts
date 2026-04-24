@@ -16,5 +16,5 @@ export interface Property {
   //images?: PropertyImage[];
   imageUrls: string[]; 
   status: PropertyStatus; 
-  
+    
 }

@@ -43,4 +43,7 @@
         @Builder.Default
         private List<PropertyImage> images = new ArrayList<>();
 
+        @ElementCollection
+        private List<String> amenities = new ArrayList<>();
+
     }

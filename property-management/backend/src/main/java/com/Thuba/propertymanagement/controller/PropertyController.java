@@ -2,24 +2,25 @@ package com.Thuba.propertymanagement.controller;
 
 import com.Thuba.propertymanagement.dto.PropertyDto;
 import com.Thuba.propertymanagement.model.PropertyStatus;
+import com.Thuba.propertymanagement.service.AIService;
 import com.Thuba.propertymanagement.service.PropertyService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.util.List;
 
 @RestController
@@ -33,6 +34,11 @@ public class PropertyController {
     @Autowired
     private javax.sql.DataSource dataSource;
 
+    private final AIService aiService;
+
+    public record DescriptionRequest(String description) {
+    }
+
     @PostConstruct
     public void logDb() throws Exception {
         System.out.println("DB URL = " + dataSource.getConnection().getMetaData().getURL());
@@ -45,49 +51,26 @@ public class PropertyController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<PropertyDto> create(
-            @Valid @RequestBody PropertyDto dto
-    ) {
+    public ResponseEntity<PropertyDto> create(@Valid @RequestBody PropertyDto dto) {
         return ResponseEntity.ok(service.create(dto));
     }
 
     @GetMapping
-    public Page<PropertyDto> getAll(
-            @RequestParam(required = false) String suburb,
-            @RequestParam(required = false) Integer bedrooms,
-            @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "9") int size,
-            @RequestParam(defaultValue = "price,asc") String sort
-    ) {
+    public Page<PropertyDto> getAll(@RequestParam(required = false) String suburb, @RequestParam(required = false) Integer bedrooms, @RequestParam(required = false) Double minPrice, @RequestParam(required = false) Double maxPrice, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "9") int size, @RequestParam(defaultValue = "price,asc") String sort) {
         String[] s = sort.split(",");
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.fromString(s[1]), s[0])
-        );
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(s[1]), s[0]));
 
-        return service.searchActive(
-                suburb,
-                bedrooms,
-                minPrice,
-                maxPrice,
-                pageable
-        );
+        return service.searchActive(suburb, bedrooms, minPrice, maxPrice, pageable);
     }
 
-   @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-   public PropertyDto uploadImages(
-           @PathVariable Long id,
-           @RequestPart("files") List<MultipartFile> files
-   ) throws IOException {
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public PropertyDto uploadImages(@PathVariable Long id, @RequestPart("files") List<MultipartFile> files) throws IOException {
 
-       System.out.println("UPLOAD HIT");
-       System.out.println("Files count: " + files.size());
+        System.out.println("UPLOAD HIT");
+        System.out.println("Files count: " + files.size());
 
-       return service.uploadPropertyImage(files, id);
-   }
+        return service.uploadPropertyImage(files, id);
+    }
 
     @PutMapping("/{id}/archive")
     @PreAuthorize("hasRole('ADMIN')")
@@ -111,18 +94,20 @@ public class PropertyController {
 
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<PropertyDto> getByStatus(
-            @RequestParam List<PropertyStatus> statuses,
-            @RequestParam(required = false) String suburb,
-            @RequestParam(required = false) Integer bedrooms,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            Pageable pageable
-    ) {
-        return service
-                .getPropertiesByStatus(
-                        statuses, suburb == null ? null : suburb.trim().toLowerCase(), bedrooms, minPrice, maxPrice, pageable
-                )
-                .map(service::toDto);
+    public Page<PropertyDto> getByStatus(@RequestParam List<PropertyStatus> statuses, @RequestParam(required = false) String suburb, @RequestParam(required = false) Integer bedrooms, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, Pageable pageable) {
+        return service.getPropertiesByStatus(statuses, suburb == null ? null : suburb.trim().toLowerCase(), bedrooms, minPrice, maxPrice, pageable).map(service::toDto);
+    }
+
+    @PostMapping("/suggest-amenities")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<String>> suggestAmenities(@Valid @RequestBody DescriptionRequest request) {
+        try {
+            // Passing the actual string field, not the object
+            List<String> amenities = aiService.extractAmenities(request.description());
+            return ResponseEntity.ok(amenities);
+        } catch (Exception e) {
+            // Return a proper error response
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
     }
 }

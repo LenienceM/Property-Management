@@ -1,6 +1,5 @@
 package com.Thuba.propertymanagement.service;
 
-
 import com.Thuba.propertymanagement.model.User;
 import com.Thuba.propertymanagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

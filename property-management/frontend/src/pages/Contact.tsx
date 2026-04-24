@@ -87,11 +87,11 @@ export default function Contact() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Email</h3>
-                <p className="text-[#C9A24D]">info@pelicanproperties.co.za</p>
+                <p className="text-[#C9A24D]">moyolenience@gmail.com</p>
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Professional Support</h3>
-                <p className="text-gray-700">+27 11 000 0000</p>
+                <p className="text-gray-700">+27838902160</p>
                 <p className="text-sm text-gray-500 mt-2">Available: Mon - Fri, 08:00 - 17:00</p>
               </div>
 

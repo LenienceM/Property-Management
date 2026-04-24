@@ -28,7 +28,6 @@ export function Navbar() {
         Contact
       </NavLink>
 
-      
       {auth.isAdmin() && (
         <NavLink
           to="/properties/add"

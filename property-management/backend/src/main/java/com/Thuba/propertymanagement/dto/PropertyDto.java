@@ -19,4 +19,5 @@ public class PropertyDto {
     private String description;
     private List<String> imageUrls;
     private PropertyStatus status;
+    private List<String> amenities;
 }

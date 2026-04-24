@@ -1,7 +1,7 @@
 import type { Property } from "../types/Property";
 
 //const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/properties";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 //export async function getProperties(page = 0, size = 6) {
 // return fetch(`${API_BASE}?page=${page}&size=${size}`).then(r => r.json());  
@@ -26,6 +26,7 @@ export async function getProperties(query: PropertyQuery = {}) {
     }
   });
 
+  
   const res = await fetch(`${API_BASE_URL}/properties?${params.toString()}`);
 
   if (!res.ok) {

@@ -12,10 +12,6 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ScrollToTop from "./components/layout/ScrollToTop";
 
-
-
-
-
 export default function App() {
   return (
 
@@ -32,7 +28,6 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
 
       {/* Admin-only add property page */}
       <Route
