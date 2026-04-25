@@ -24,7 +24,10 @@ export default function AddProperty() {
   setAiLoading(true);
 
   try {
-    const res = await fetch(`${API_BASE_URL}/properties/suggest-amenities`, {
+
+
+
+const res = await fetch(`${API_BASE_URL}/properties/suggest-amenities`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -33,20 +36,30 @@ export default function AddProperty() {
   body: JSON.stringify({ description }),
 });
 
-
-
-
-console.log("TOKEN:", localStorage.getItem("token"));
 if (!res.ok) {
   const text = await res.text();
   console.error("AI error:", res.status, text);
   throw new Error("AI request failed");
 }
 
+const data = await res.json();
+
+console.log("AI RAW:", data);
+
+const parsed = Array.isArray(data)
+  ? data
+  : typeof data === "string"
+  ? data.split(",").map((s: string) => s.trim())
+  : data.amenities || [];
+
+setSuggestedAmenities(parsed);
 
 
-    const data = await res.json();
-    setSuggestedAmenities(data);
+
+
+
+
+
   } catch (err) {
     console.error(err);
     alert("Failed to get AI suggestions");
@@ -155,10 +168,11 @@ return (
         <h2 className="text-lg font-semibold text-gray-800">Description</h2>
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Property Description (e.g., 'A lovely home in Morningside with a pool')" className="w-full border p-3 rounded h-24 focus:border-[#C9A24D] outline-none" required />
         
-        <button type="button" onClick={suggestAmenities} className="w-full py-2 bg-[#C9A24D] text-black font-medium rounded hover:bg-[#B79424] transition disabled:opacity-50">
+        <button type="button" onClick={suggestAmenities}   disabled={aiLoading} className="w-full py-2 bg-[#C9A24D] text-black font-medium rounded hover:bg-[#B79424] transition disabled:opacity-50">
           {aiLoading ? "Thinking..." : "Generate AI Amenities"}
         </button>
 
+    
 
 {/* Suggested Amenities */}
 {suggestedAmenities.length > 0 && (
