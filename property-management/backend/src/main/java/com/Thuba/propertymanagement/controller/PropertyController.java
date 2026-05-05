@@ -85,11 +85,6 @@ public class PropertyController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(" ")
-    public String home() {
-        return "Property Management API is running";
-    }
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Long id) {
