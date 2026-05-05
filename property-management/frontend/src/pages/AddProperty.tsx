@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Container from "../components/layout/Container";
-import SectionHeader from "../components/ui/SectionHeader";
+
 
 export default function AddProperty() {
   const [title, setTitle] = useState("");
