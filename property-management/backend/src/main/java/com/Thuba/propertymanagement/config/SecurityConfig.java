@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/").permitAll()
+                        .requestMatchers("/properties").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Explicitly permit pre-flight
                         .requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN")
@@ -69,7 +70,6 @@ public class SecurityConfig {
 
         return source;
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
