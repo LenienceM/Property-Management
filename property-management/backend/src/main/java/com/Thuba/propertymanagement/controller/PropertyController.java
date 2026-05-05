@@ -7,7 +7,6 @@ import com.Thuba.propertymanagement.service.PropertyService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,28 +19,28 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/properties")
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "http://localhost:5173")
 public class PropertyController {
 
     private final PropertyService service;
-
-    @Autowired
-    private javax.sql.DataSource dataSource;
-
+    private final javax.sql.DataSource dataSource;
     private final AIService aiService;
 
     public record DescriptionRequest(String description) {
     }
 
     @PostConstruct
-    public void logDb() throws Exception {
-        System.out.println("DB URL = " + dataSource.getConnection().getMetaData().getURL());
+    public void logDb() {
+        try (var connection = dataSource.getConnection()) {
+            String url = connection.getMetaData().getURL();
+            System.out.printf("DB URL = %s%n", url);
+        } catch (Exception e) {
+            System.err.printf("Database metadata access failed: %s%n", e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
@@ -56,18 +55,18 @@ public class PropertyController {
     }
 
     @GetMapping
-    public Page<PropertyDto> getAll(@RequestParam(required = false) String suburb, @RequestParam(required = false) Integer bedrooms, @RequestParam(required = false) Double minPrice, @RequestParam(required = false) Double maxPrice, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "9") int size, @RequestParam(defaultValue = "price,asc") String sort) {
+    public Page<PropertyDto> getAll(@RequestParam(required = false) String suburb, @RequestParam(required = false) Integer bedrooms, @RequestParam(required = false) Integer bathrooms, @RequestParam(required = false) Double minPrice, @RequestParam(required = false) Double maxPrice, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "9") int size, @RequestParam(defaultValue = "price,asc") String sort) {
         String[] s = sort.split(",");
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(s[1]), s[0]));
 
-        return service.searchActive(suburb, bedrooms, minPrice, maxPrice, pageable);
+        return service.searchActive(suburb, bedrooms, bathrooms, minPrice, maxPrice, pageable);
     }
 
     @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public PropertyDto uploadImages(@PathVariable Long id, @RequestPart("files") List<MultipartFile> files) throws IOException {
 
         System.out.println("UPLOAD HIT");
-        System.out.println("Files count: " + files.size());
+        System.out.printf("Files count: %d%n", files.size());
 
         return service.uploadPropertyImage(files, id);
     }
@@ -85,10 +84,12 @@ public class PropertyController {
         service.restore(id);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/")
     public String home() {
         return "Property Management API is running";
     }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Long id) {
@@ -97,19 +98,22 @@ public class PropertyController {
 
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<PropertyDto> getByStatus(@RequestParam List<PropertyStatus> statuses, @RequestParam(required = false) String suburb, @RequestParam(required = false) Integer bedrooms, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, Pageable pageable) {
-        return service.getPropertiesByStatus(statuses, suburb == null ? null : suburb.trim().toLowerCase(), bedrooms, minPrice, maxPrice, pageable).map(service::toDto);
+    public Page<PropertyDto> getByStatus(
+            @RequestParam List<PropertyStatus> statuses,
+            Pageable pageable) {
+
+        return service.getPropertiesByStatus(statuses, pageable).map(service::toDto);
     }
 
     @PostMapping("/suggest-amenities")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<String>> suggestAmenities(@Valid @RequestBody DescriptionRequest request) {
         try {
-            // Passing the actual string field, not the object
+
             List<String> amenities = aiService.extractAmenities(request.description());
             return ResponseEntity.ok(amenities);
         } catch (Exception e) {
-            // Return a proper error response
+
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
     }

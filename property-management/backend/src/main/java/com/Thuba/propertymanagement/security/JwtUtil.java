@@ -1,58 +1,3 @@
-/*package com.Thuba.propertymanagement.security;
-
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-@Component
-public class JwtUtil {
-
-    private final String SECRET = "mySecretKey123"; // store securely!
-
-    public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        //claims.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
-
-        claims.put("role", userDetails.getAuthorities()
-                .stream()
-                .findFirst()
-                .get()
-                .getAuthority());
-
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24h
-                .signWith(SignatureAlgorithm.HS256, SECRET)
-                .compact();
-    }
-
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
-    }
-
-    public String extractUsername(String token) {
-        return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody().getSubject();
-    }
-
-    public boolean isTokenExpired(String token) {
-        return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token)
-                .getBody().getExpiration().before(new Date());
-    }
-
-
-}
-*/
-
 package com.Thuba.propertymanagement.security;
 
 import io.jsonwebtoken.Claims;
@@ -70,7 +15,8 @@ import java.util.Date;
 public class JwtUtil {
 
     private final Key key;
-    private final long EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
+
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 hours
 
     public JwtUtil(@Value("${JWT_SECRET}") String secret) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
@@ -79,9 +25,9 @@ public class JwtUtil {
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
-                .claim("roles", userDetails.getAuthorities()) // Add roles here
+                .claim("roles", userDetails.getAuthorities())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -91,7 +37,9 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
-        System.out.println("DEBUG: Authenticating with authorities: " + userDetails.getAuthorities());
+        // Fix: Replaced concatenation with printf to remove template warning
+        System.out.printf("DEBUG: Authenticating with authorities: %s%n", userDetails.getAuthorities());
+
         return extractUsername(token).equals(userDetails.getUsername())
                 && !isTokenExpired(token);
     }

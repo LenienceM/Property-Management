@@ -25,8 +25,6 @@ export default function AddProperty() {
 
   try {
 
-
-
 const res = await fetch(`${API_BASE_URL}/properties/suggest-amenities`, {
   method: "POST",
   headers: {
@@ -53,12 +51,6 @@ const parsed = Array.isArray(data)
   : data.amenities || [];
 
 setSuggestedAmenities(parsed);
-
-
-
-
-
-
 
   } catch (err) {
     console.error(err);
@@ -141,8 +133,6 @@ setSuggestedAmenities(parsed);
     }
   };
 
-
-
 return (
   <Container>
     {/* heading */}
@@ -154,14 +144,60 @@ return (
     <form onSubmit={handleSubmit} className="max-w-xl mx-auto space-y-8 py-6">
       
       {/* Grouped: Basic Info */}
-     <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-        <h2 className="text-lg font-semibold text-gray-800">Basic Information</h2>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none" required />
-        <div className="grid grid-cols-2 gap-4">
-          <input value={suburb} onChange={(e) => setSuburb(e.target.value)} placeholder="Suburb" className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none" required />
-          <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" placeholder="Price" className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none" required />
-        </div>
-      </div>
+    {/* Grouped: Basic Info */}
+<div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+  <h2 className="text-lg font-semibold text-gray-800">Basic Information</h2>
+  
+  {/* Full width Title */}
+  <input 
+    value={title} 
+    onChange={(e) => setTitle(e.target.value)} 
+    placeholder="Title" 
+    className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none" 
+    required 
+  />
+
+  {/* Row 1: Suburb and Price */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <input 
+      value={suburb} 
+      onChange={(e) => setSuburb(e.target.value)} 
+      placeholder="Suburb" 
+      className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none" 
+      required 
+    />
+    <input 
+      value={price} 
+      onChange={(e) => setPrice(e.target.value)} 
+      type="number" 
+      placeholder="Price" 
+      className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none" 
+      required 
+    />
+  </div>
+
+  {/* Row 2: Bedrooms and Bathrooms */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <input 
+      value={bedrooms} 
+      onChange={(e) => setBedrooms(e.target.value)} 
+      type="number" 
+      placeholder="Bedrooms" 
+      min="0"
+      className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none" 
+      required 
+    />
+    <input 
+      value={bathrooms} 
+      onChange={(e) => setBathrooms(e.target.value)} 
+      type="number" 
+      placeholder="Bathrooms" 
+      min="0"
+      className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none" 
+      required 
+    />
+  </div>
+</div>
 
       {/* Grouped: Amenities */}
       <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
@@ -170,9 +206,7 @@ return (
         
         <button type="button" onClick={suggestAmenities}   disabled={aiLoading} className="w-full py-2 bg-[#C9A24D] text-black font-medium rounded hover:bg-[#B79424] transition disabled:opacity-50">
           {aiLoading ? "Thinking..." : "Generate AI Amenities"}
-        </button>
-
-    
+        </button>  
 
 {/* Suggested Amenities */}
 {suggestedAmenities.length > 0 && (
@@ -222,7 +256,7 @@ return (
 )}
 
 
-        {/* Suggested and Selected sections here... */}
+        {/* sections */}
       </div>
 
       {/* Grouped: Media */}
@@ -242,168 +276,3 @@ return (
 );
 }
 
-  
-
-/*
-  return (
-    <Container>
-      <div className="py-6 border-b border-gray-200 mb-6">
-      <h1 className="text-3xl font-bold text-[#C9A24D]">Add Property</h1>
-      <p className="text-gray-500 mt-2">Enter the details below to list your property.</p>
-    </div>
-
-      <form onSubmit={handleSubmit} className="max-w-lg mx-auto space-y-4 py-6">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-          className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none"
-          required
-        />
-
-        <input
-          value={suburb}
-          onChange={(e) => setSuburb(e.target.value)}
-          placeholder="Suburb"
-          className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none"
-          required
-        />
-
-        <input
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          type="number"
-          placeholder="Price"
-          min={1000}
-          step="0.01"
-          className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none"
-          required
-        />
-
-        <input
-          value={bedrooms}
-          onChange={(e) => setBedrooms(e.target.value)}
-          type="number"
-          placeholder="Bedrooms"
-          min={0}
-          className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none"
-          required
-        />
-
-        <input
-          value={bathrooms}
-          onChange={(e) => setBathrooms(e.target.value)}
-          type="number"
-          placeholder="Bathrooms"
-          min={0}
-          className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none"
-          required
-        />
-
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description"
-          className="w-full border p-3 rounded focus:border-[#C9A24D] outline-none"
-          required
-        />
-
-
-        <button
-          type="button"
-          onClick={suggestAmenities}
-          className="mt-2 px-4 py-2 bg-black text-white rounded"
-          
-        >
-          {aiLoading ? "Thinking..." : "Suggest Amenities"}
-        </button>
-
-        {suggestedAmenities.length > 0 && (
-          <div className="mt-4">
-            <p className="text-sm font-semibold mb-2">Suggested Amenities:</p>
-            <div className="flex flex-wrap gap-2">
-              {suggestedAmenities.map((item, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() =>
-                    setAmenities((prev) =>
-                      prev.includes(item) ? prev : [...prev, item]
-                    )
-                  }
-                  className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                >
-                  + {item}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {amenities.length > 0 && (
-          <div className="mt-4">
-            <p className="text-sm font-semibold mb-2">Selected Amenities:</p>
-            <div className="flex flex-wrap gap-2">
-              {amenities.map((item, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-[#C9A24D] text-black rounded cursor-pointer"
-                  onClick={() =>
-                    setAmenities((prev) => prev.filter((a) => a !== item))
-                  }
-                >
-                  {item} ✕
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) =>
-            setImages(e.target.files ? Array.from(e.target.files) : [])
-          }
-        />
-
-        {images.length > 0 && (
-          <div className="grid grid-cols-3 gap-3 mt-3">
-            {images.map((file, index) => (
-              <div key={index} className="relative">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt="preview"
-                  className="h-24 w-full object-cover rounded"
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setImages((prev) => prev.filter((_, i) => i !== index))
-                  }
-                  className="absolute top-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-[#C9A24D] text-black py-3 rounded disabled:opacity-50 hover:bg-[#B79424] transition"
-        >
-          {loading ? "Saving..." : "Add Property"}
-        </button>
-      </form>
-    </Container>
-  );
-}
-
-
-
-
-*/

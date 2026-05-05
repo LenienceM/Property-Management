@@ -1,11 +1,6 @@
 import type { Property } from "../types/Property";
 
-//const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
-
-//export async function getProperties(page = 0, size = 6) {
-// return fetch(`${API_BASE}?page=${page}&size=${size}`).then(r => r.json());  
-//}
 
 type PropertyQuery = {
   page?: number;

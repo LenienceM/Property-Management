@@ -29,7 +29,7 @@ export default function Properties() {
   const [priceRange, setPriceRange] = useState("");
   //const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("");
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
   const priceRanges: Record<
     string,
     { min?: number; max?: number }

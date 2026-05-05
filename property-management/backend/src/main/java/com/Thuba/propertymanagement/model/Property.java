@@ -20,10 +20,10 @@
         private String title;
         private double price;
 
-        @Column(length = 255)
+        @Column()
         private String suburb;
 
-        @Column(nullable = true)
+        @Column()
         private int bedrooms;
 
         private int bathrooms;

@@ -3,15 +3,18 @@ package com.Thuba.propertymanagement.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j // Replaces printStackTrace with robust logging
 @Service
 @RequiredArgsConstructor
 public class AIService {
@@ -26,7 +29,7 @@ public class AIService {
 
     public List<String> extractAmenities(String description) {
 
-        String prompt = """
+        String prompt = String.format("""
                 Extract amenities from this property description.
                 
                 Rules:
@@ -36,31 +39,39 @@ public class AIService {
                 
                 Description:
                 %s
-                """.formatted(description);
-        System.out.println("DEBUG: Request URL: " + apiUrl + "?key=" + apiKey);
-        System.out.println("DEBUG: Request Body: " + buildRequest(prompt));
+                """, description);
+
+        // Fix: Use UriComponentsBuilder to build the URL cleanly
+        String fullUrl = UriComponentsBuilder.fromHttpUrl(apiUrl)
+                .queryParam("key", apiKey)
+                .toUriString();
+
+        String requestBody = buildRequest(prompt);
+
+        log.debug("Request URL: {}", fullUrl);
+        log.debug("Request Body: {}", requestBody);
 
         try {
             String response = webClient.post()
-                    .uri(apiUrl + "?key=" + apiKey)
+                    .uri(fullUrl)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(buildRequest(prompt))
+                    .bodyValue(requestBody)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
 
-            System.out.println("RAW AI RESPONSE: " + response);
+            log.info("RAW AI RESPONSE: {}", response);
             return parseAmenities(response);
 
         } catch (Exception e) {
-            System.err.println("CRITICAL ERROR: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to call AI: " + e.getMessage());
+            // Fix: Log the error properly instead of printStackTrace
+            log.error("CRITICAL AI SERVICE ERROR: {}", e.getMessage(), e);
+            throw new RuntimeException(String.format("Failed to call AI: %s", e.getMessage()));
         }
     }
 
     private String buildRequest(String prompt) {
-        return """
+        return String.format("""
                 {
                   "contents": [
                     {
@@ -70,13 +81,11 @@ public class AIService {
                     }
                   ]
                 }
-                """.formatted(prompt.replace("\"", "\\\""));
+                """, prompt.replace("\"", "\\\""));
     }
 
     private List<String> parseAmenities(String response) {
         try {
-            //Extract text from Gemini JSON response
-
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response);
 
@@ -96,8 +105,7 @@ public class AIService {
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse AI response: " + response);
+            throw new RuntimeException(String.format("Failed to parse AI response: %s", response));
         }
     }
-
 }

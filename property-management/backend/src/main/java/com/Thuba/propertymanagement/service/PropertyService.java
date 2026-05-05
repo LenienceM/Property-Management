@@ -13,15 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,43 +32,8 @@ public class PropertyService {
     @Value("${aws.s3.region}")
     private String region;
 
-
-    /**
-     * Generate a pre-signed URL valid for 24 hours.
-     */
-    public String generatePresignedUrl(String key) {
-        try (S3Presigner presigner = S3Presigner.builder()
-                .credentialsProvider(s3Client.serviceClientConfiguration().credentialsProvider())
-                .region(s3Client.serviceClientConfiguration().region())
-                .build()) {
-
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(key)
-                    .build();
-
-            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofHours(24))
-                    .getObjectRequest(getObjectRequest)
-                    .build();
-
-            URL url = presigner.presignGetObject(presignRequest).url();
-            return url.toString();
-        }
-    }
-
-    public Page<PropertyDto> findActive(Integer bedrooms, Double minPrice, Double maxPrice, Pageable pageable) {
-        return repo.findActiveFiltered(PropertyStatus.ACTIVE, bedrooms, minPrice, maxPrice, pageable)
-                .map(this::toDto);
-    }
-
-    public Page<PropertyDto> searchActive(String suburb, Integer bedrooms, Double minPrice, Double maxPrice, Pageable pageable) {
-        return repo.searchActive(PropertyStatus.ACTIVE, suburb, bedrooms, minPrice, maxPrice, pageable)
-                .map(this::toDto);
-    }
-
-    public Page<PropertyDto> findAll(String suburb, Integer bedrooms, Double minPrice, Double maxPrice, Pageable pageable) {
-        return repo.searchActive(PropertyStatus.ACTIVE, suburb, bedrooms, minPrice, maxPrice, pageable)
+    public Page<PropertyDto> searchActive(String suburb, Integer bedrooms, Integer bathrooms, Double minPrice, Double maxPrice, Pageable pageable) {
+        return repo.searchActive(PropertyStatus.ACTIVE, suburb, bedrooms, bathrooms, minPrice, maxPrice, pageable)
                 .map(this::toDto);
     }
 
@@ -91,9 +50,10 @@ public class PropertyService {
     public PropertyDto create(PropertyDto dto) {
         Property property = Property.builder()
                 .title(dto.getTitle())
-                .price(dto.getPrice() == null ? 0 : dto.getPrice())
+                .price(dto.getPrice() == null ? 0.0 : dto.getPrice())
                 .suburb(dto.getSuburb())
                 .bedrooms(dto.getBedrooms() == null ? 0 : dto.getBedrooms())
+                .bathrooms(dto.getBathrooms() == null ? 0 : dto.getBathrooms())
                 .description(dto.getDescription())
                 .status(PropertyStatus.ACTIVE)
                 .amenities(dto.getAmenities())
@@ -122,32 +82,18 @@ public class PropertyService {
         repo.deleteById(id);
     }
 
-    public Page<PropertyDto> getActiveProperties(Pageable pageable) {
-        return repo.findByStatus(PropertyStatus.ACTIVE, pageable)
-                .map(this::toDto);
-    }
-
-    public Page<Property> getPropertiesByStatus(List<PropertyStatus> statuses, String suburb, Integer bedrooms,
-                                                BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+    public Page<Property> getPropertiesByStatus(List<PropertyStatus> statuses, Pageable pageable) {
         return repo.findByStatusIn(statuses, pageable);
     }
 
-    public Property updateStatus(Long id, PropertyStatus status) {
-        Property property = findEntity(id);
-        property.setStatus(status);
-        return repo.save(property);
-    }
-
-    // ---------------- Image Handling ----------------
-
+    @Transactional
     public PropertyDto uploadPropertyImage(List<MultipartFile> files, Long propertyId) throws IOException {
-
-        Property property = repo.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+        Property property = findEntity(propertyId);
 
         for (MultipartFile file : files) {
 
-            String key = "properties/" + propertyId + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+            String key = String.format("properties/%d/%s-%s",
+                    propertyId, UUID.randomUUID(), file.getOriginalFilename());
 
             PutObjectRequest putRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
@@ -155,31 +101,22 @@ public class PropertyService {
                     .contentType(file.getContentType())
                     .build();
 
-            s3Client.putObject(
-                    putRequest,
-                    software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes())
-            );
-
-            String imageUrl = s3Client.utilities()
-                    .getUrl(builder -> builder.bucket(bucketName).key(key))
-                    .toExternalForm();
+            s3Client.putObject(putRequest,
+                    software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
 
             PropertyImage image = new PropertyImage();
             image.setProperty(property);
-            //image.setFilename(imageUrl);
             image.setFilename(key);
 
             property.getImages().add(image);
         }
 
         repo.save(property);
-
         return toDto(property);
     }
 
     public PropertyDto toDto(Property property) {
         PropertyDto dto = new PropertyDto();
-
         dto.setId(property.getId());
         dto.setTitle(property.getTitle());
         dto.setSuburb(property.getSuburb());
@@ -192,7 +129,8 @@ public class PropertyService {
 
         dto.setImageUrls(
                 property.getImages().stream()
-                        .map(img -> "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + img.getFilename())
+                        .map(img -> String.format("https://%s.s3.%s.amazonaws.com/%s",
+                                bucketName, region, img.getFilename()))
                         .toList()
         );
         return dto;
