@@ -85,7 +85,7 @@ public class PropertyController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/")
+    @GetMapping(" ")
     public String home() {
         return "Property Management API is running";
     }
