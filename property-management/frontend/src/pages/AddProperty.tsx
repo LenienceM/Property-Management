@@ -112,8 +112,7 @@ setSuggestedAmenities(parsed);
         );
 
         if (!imgRes.ok) {
-        //  const text = await imgRes.text();
-         // console.error("Image upload error:", text);
+        ;
             console.error("Status:", imgRes.status);
 
             const text = await imgRes.text();
@@ -143,12 +142,11 @@ return (
 
     <form onSubmit={handleSubmit} className="max-w-xl mx-auto space-y-8 py-6">
       
-      {/* Grouped: Basic Info */}
     {/* Grouped: Basic Info */}
 <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
   <h2 className="text-lg font-semibold text-gray-800">Basic Information</h2>
   
-  {/* Full width Title */}
+
   <input 
     value={title} 
     onChange={(e) => setTitle(e.target.value)} 
@@ -176,7 +174,7 @@ return (
     />
   </div>
 
-  {/* Row 2: Bedrooms and Bathrooms */}
+  {/* Bedrooms and Bathrooms */}
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <input 
       value={bedrooms} 
@@ -208,7 +206,6 @@ return (
           {aiLoading ? "Thinking..." : "Generate AI Amenities"}
         </button>  
 
-{/* Suggested Amenities */}
 {suggestedAmenities.length > 0 && (
   <div className="mt-4">
     <p className="text-sm font-semibold mb-2 text-gray-700">
@@ -255,8 +252,6 @@ return (
   </div>
 )}
 
-
-        {/* sections */}
       </div>
 
       {/* Grouped: Media */}

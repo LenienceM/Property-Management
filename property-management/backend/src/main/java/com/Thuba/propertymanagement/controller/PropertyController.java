@@ -1,8 +1,8 @@
 package com.Thuba.propertymanagement.controller;
 
+import com.Thuba.propertymanagement.config.RabbitConfig;
 import com.Thuba.propertymanagement.dto.PropertyDto;
 import com.Thuba.propertymanagement.model.PropertyStatus;
-import com.Thuba.propertymanagement.service.AIService;
 import com.Thuba.propertymanagement.service.PropertyService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
@@ -28,7 +28,8 @@ public class PropertyController {
 
     private final PropertyService service;
     private final javax.sql.DataSource dataSource;
-    private final AIService aiService;
+    private final org.springframework.amqp.rabbit.core.RabbitTemplate rabbitTemplate;
+    private final com.Thuba.propertymanagement.service.AiTaskTracker taskTracker;
 
     public record DescriptionRequest(String description) {
     }
@@ -100,16 +101,39 @@ public class PropertyController {
         return service.getPropertiesByStatus(statuses, pageable).map(service::toDto);
     }
 
+    // Submit the description and get a Ticket (Job ID)
     @PostMapping("/suggest-amenities")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<String>> suggestAmenities(@Valid @RequestBody DescriptionRequest request) {
-        try {
+    public ResponseEntity<String> submitAiTask(@Valid @RequestBody DescriptionRequest request) {
+        String jobId = java.util.UUID.randomUUID().toString();
 
-            List<String> amenities = aiService.extractAmenities(request.description());
-            return ResponseEntity.ok(amenities);
-        } catch (Exception e) {
+        taskTracker.startTask(jobId);
 
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        // Send to RabbitMQ: "jobId|description"
+        String payload = String.format("%s|%s", jobId, request.description());
+        rabbitTemplate.convertAndSend(RabbitConfig.AI_QUEUE, payload);
+
+        // Return HTTP 202 Accepted with the Job ID
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(jobId);
+    }
+
+    // Frontend calls this to check if the AI is done
+    @GetMapping("/suggest-amenities/status/{jobId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getTaskStatus(@PathVariable String jobId) {
+        Object result = taskTracker.getTaskResult(jobId);
+
+        if (result == null) {
+            return ResponseEntity.notFound().build();
         }
+        if ("PENDING".equals(result)) {
+            return ResponseEntity.status(HttpStatus.PROCESSING).body("Task is still running");
+        }
+        if ("ERROR".equals(result)) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("AI Processing failed");
+        }
+
+        // If it's a list, it's done! Return the amenities.
+        return ResponseEntity.ok(result);
     }
 }

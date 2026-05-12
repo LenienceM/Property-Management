@@ -34,3 +34,4 @@ public class RootController {
         return service.searchActive(suburb, bedrooms, bathrooms, minPrice, maxPrice, pageable);
     }
 }
+
