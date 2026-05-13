@@ -19,47 +19,72 @@ export default function AddProperty() {
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
   const suggestAmenities = async () => {
-  if (!description) return;
+    if (!description) return;
 
-  setAiLoading(true);
+    setAiLoading(true);
 
-  try {
+    try {
+      const token = localStorage.getItem("token");
 
-const res = await fetch(`${API_BASE_URL}/properties/suggest-amenities`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-  body: JSON.stringify({ description }),
-});
+      // STEP 1: Submit the task and get the Ticket ID (UUID)
+      const initRes = await fetch(`${API_BASE_URL}/properties/suggest-amenities`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ description }),
+      });
 
-if (!res.ok) {
-  const text = await res.text();
-  console.error("AI error:", res.status, text);
-  throw new Error("AI request failed");
-}
+      if (!initRes.ok) {
+        throw new Error("Failed to start AI task");
+      }
 
-const data = await res.json();
+      // This is the db1215f5... string
+      const jobId = await initRes.text(); 
+      console.log("Task started with Job ID:", jobId);
 
-console.log("AI RAW:", data);
+      // STEP 2: "Poll" the status endpoint until the task is COMPLETED
+      let isDone = false;
+      let finalAmenities: string[] = [];
 
-const parsed = Array.isArray(data)
-  ? data
-  : typeof data === "string"
-  ? data.split(",").map((s: string) => s.trim())
-  : data.amenities || [];
+      while (!isDone) {
+        // Wait 2 seconds before checking the status (so we don't spam the server)
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
-setSuggestedAmenities(parsed);
+        const statusRes = await fetch(
+          `${API_BASE_URL}/properties/suggest-amenities/status/${jobId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-  } catch (err) {
-    console.error(err);
-    alert("Failed to get AI suggestions");
-  } finally {
-    setAiLoading(false);
-  }
-};
-  
+        const statusData = await statusRes.json();
+        console.log("Current AI Status:", statusData);
+
+        if (statusData.status === "COMPLETED") {
+          // The AI is done! Grab the array from the "data" key
+          finalAmenities = statusData.data;
+          isDone = true;
+        } else if (statusData.status === "ERROR") {
+          throw new Error(statusData.message || "AI processing failed");
+        }
+        // If status is "PENDING", the loop just continues and waits another 2 seconds
+      }
+
+      // STEP 3: Update the UI with the final result
+      setSuggestedAmenities(finalAmenities);
+
+    } catch (err) {
+      console.error("AI flow error:", err);
+      alert("Failed to get AI suggestions");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -204,7 +229,15 @@ return (
         
         <button type="button" onClick={suggestAmenities}   disabled={aiLoading} className="w-full py-2 bg-[#C9A24D] text-black font-medium rounded hover:bg-[#B79424] transition disabled:opacity-50">
           {aiLoading ? "Thinking..." : "Generate AI Amenities"}
-        </button>  
+        </button>       
+         
+         {/* THE MAGIC SAUCE: Helper text that only shows while loading */}
+          {aiLoading && (
+            <p className="text-xs text-center text-gray-500 mt-2">
+              Feel free to upload your gallery images while we generate this!
+            </p>
+          )}
+        
 
 {suggestedAmenities.length > 0 && (
   <div className="mt-4">

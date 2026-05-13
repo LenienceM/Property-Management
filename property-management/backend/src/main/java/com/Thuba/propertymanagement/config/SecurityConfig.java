@@ -44,11 +44,13 @@ public class SecurityConfig {
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/properties").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Explicitly permit pre-flight
+                        .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/properties/suggest-amenities").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
+                        //.requestMatchers(HttpMethod.GET, "/api/properties/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/properties", "/api/properties/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

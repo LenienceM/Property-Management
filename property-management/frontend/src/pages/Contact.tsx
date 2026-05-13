@@ -11,11 +11,38 @@ export default function Contact() {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Added states for better UI feedback
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic for connecting to your Spring Boot /api/contact can go here
-    console.log("Form Data:", formData);
-    alert("Thank you for contacting Pelican Properties. Our team will reach out to you shortly.");
+    setIsSubmitting(true);
+    setSubmitStatus("idle");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setSubmitStatus("success");
+        // Clear the form after successful submission
+        setFormData({ name: "", email: "", service: "General Inquiry", message: "" });
+      } else {
+        setSubmitStatus("error");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setSubmitStatus("error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -33,50 +60,73 @@ export default function Contact() {
           <div className="grid md:grid-cols-2 gap-20">
 
             {/* Contact Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <input
-                required
-                className="w-full border border-gray-300 p-4 rounded focus:border-[#C9A24D] outline-none"
-                placeholder="Your Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-              <input
-                required
-                type="email"
-                className="w-full border border-gray-300 p-4 rounded focus:border-[#C9A24D] outline-none"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
+            <div>
+              {/* Feedback Messages */}
+              {submitStatus === "success" && (
+                <div className="mb-6 p-4 bg-green-50 text-green-700 border border-green-200 rounded">
+                  Thank you for contacting Pelican Properties. Our team will reach out to you shortly.
+                </div>
+              )}
+              {submitStatus === "error" && (
+                <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded">
+                  Something went wrong sending your message. Please try again or contact us directly.
+                </div>
+              )}
 
-              {/* Added Service Selection to match your Mission Statement */}
-              <select
-                className="w-full border border-gray-300 p-4 rounded focus:border-[#C9A24D] outline-none bg-white text-gray-500"
-                value={formData.service}
-                onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-              >
-                <option>General Inquiry</option>
-                <option>Property Sales</option>
-                <option>Property Rentals</option>
-                <option>Property Management</option>
-                <option>Maintenance & Compliance</option>
-              </select>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <input
+                  required
+                  className="w-full border border-gray-300 p-4 rounded focus:border-[#C9A24D] outline-none"
+                  placeholder="Your Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  disabled={isSubmitting}
+                />
+                <input
+                  required
+                  type="email"
+                  className="w-full border border-gray-300 p-4 rounded focus:border-[#C9A24D] outline-none"
+                  placeholder="Email Address"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  disabled={isSubmitting}
+                />
 
-              <textarea
-                required
-                className="w-full border border-gray-300 p-4 h-40 rounded focus:border-[#C9A24D] outline-none"
-                placeholder="How can we help you?"
-                value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              />
-              <button
-                type="submit"
-                className="px-8 py-4 border border-[#C9A24D] text-[#C9A24D] hover:bg-[#C9A24D] hover:text-black font-semibold transition rounded"
-              >
-                Send Message
-              </button>
-            </form>
+                {/* Service Selection */}
+                <select
+                  className="w-full border border-gray-300 p-4 rounded focus:border-[#C9A24D] outline-none bg-white text-gray-500"
+                  value={formData.service}
+                  onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                  disabled={isSubmitting}
+                >
+                  <option>General Inquiry</option>
+                  <option>Property Sales</option>
+                  <option>Property Rentals</option>
+                  <option>Property Management</option>
+                  <option>Maintenance & Compliance</option>
+                </select>
+
+                <textarea
+                  required
+                  className="w-full border border-gray-300 p-4 h-40 rounded focus:border-[#C9A24D] outline-none"
+                  placeholder="How can we help you?"
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`px-8 py-4 border border-[#C9A24D] text-[#C9A24D] font-semibold transition rounded ${
+                    isSubmitting 
+                      ? "opacity-50 cursor-not-allowed" 
+                      : "hover:bg-[#C9A24D] hover:text-black"
+                  }`}
+                >
+                  {isSubmitting ? "Sending..." : "Send Message"}
+                </button>
+              </form>
+            </div>
 
             {/* Contact Details */}
             <div className="space-y-8">
