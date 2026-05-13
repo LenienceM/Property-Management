@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/properties")
@@ -118,7 +119,7 @@ public class PropertyController {
     }
 
     // Frontend calls this to check if the AI is done
-    @GetMapping("/suggest-amenities/status/{jobId}")
+ /*   @GetMapping("/suggest-amenities/status/{jobId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getTaskStatus(@PathVariable String jobId) {
         Object result = taskTracker.getTaskResult(jobId);
@@ -135,5 +136,42 @@ public class PropertyController {
 
         // If it's a list, it's done! Return the amenities.
         return ResponseEntity.ok(result);
+    }*/
+
+
+
+    @GetMapping("/suggest-amenities/status/{jobId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getTaskStatus(@PathVariable String jobId) {
+        Object result = taskTracker.getTaskResult(jobId);
+
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Wrapped in a Map, this becomes: {"status": "PENDING", "message": "Task is still running"}
+        if ("PENDING".equals(result)) {
+            return ResponseEntity.status(HttpStatus.PROCESSING)
+                    .body(Map.of(
+                            "status", "PENDING",
+                            "message", "Task is still running"
+                    ));
+        }
+
+        // Wrapped in a Map, this becomes: {"status": "ERROR", "message": "AI Processing failed"}
+        if ("ERROR".equals(result)) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "status", "ERROR",
+                            "message", "AI Processing failed"
+                    ));
+        }
+
+        // Wrap the final success result too, so the frontend always expects an object
+        // This becomes: {"status": "COMPLETED", "data": [your, list, of, amenities]}
+        return ResponseEntity.ok(Map.of(
+                "status", "COMPLETED",
+                "data", result
+        ));
     }
 }
