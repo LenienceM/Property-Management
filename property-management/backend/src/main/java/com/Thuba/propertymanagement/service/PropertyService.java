@@ -7,6 +7,7 @@ import com.Thuba.propertymanagement.model.PropertyStatus;
 import com.Thuba.propertymanagement.repository.PropertyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.cache.annotation.Cacheable;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +44,7 @@ public class PropertyService {
         return repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
     }
-
+    @Cacheable(value = "properties", key = "#id")
     public PropertyDto findById(Long id) {
         return toDto(findEntity(id));
     }
@@ -66,18 +69,21 @@ public class PropertyService {
         return toDto(repo.save(property));
     }
 
+    @CacheEvict(value = "properties", key = "#id")
     public void archive(Long id) {
         Property property = findEntity(id);
         property.setStatus(PropertyStatus.ARCHIVED);
         repo.save(property);
     }
 
+    @CacheEvict(value = "properties", key = "#id")
     public void restore(Long id) {
         Property property = findEntity(id);
         property.setStatus(PropertyStatus.ACTIVE);
         repo.save(property);
     }
 
+    @CacheEvict(value = "properties", key = "#id")
     public void delete(Long id) {
         repo.deleteById(id);
     }
