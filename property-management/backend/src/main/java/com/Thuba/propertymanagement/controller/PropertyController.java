@@ -118,27 +118,6 @@ public class PropertyController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(jobId);
     }
 
-    // Frontend calls this to check if the AI is done
- /*   @GetMapping("/suggest-amenities/status/{jobId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getTaskStatus(@PathVariable String jobId) {
-        Object result = taskTracker.getTaskResult(jobId);
-
-        if (result == null) {
-            return ResponseEntity.notFound().build();
-        }
-        if ("PENDING".equals(result)) {
-            return ResponseEntity.status(HttpStatus.PROCESSING).body("Task is still running");
-        }
-        if ("ERROR".equals(result)) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("AI Processing failed");
-        }
-
-        // If it's a list, it's done! Return the amenities.
-        return ResponseEntity.ok(result);
-    }*/
-
-
 
     @GetMapping("/suggest-amenities/status/{jobId}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -158,7 +137,6 @@ public class PropertyController {
                     ));
         }
 
-        // Wrapped in a Map, this becomes: {"status": "ERROR", "message": "AI Processing failed"}
         if ("ERROR".equals(result)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(

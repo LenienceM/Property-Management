@@ -2,7 +2,7 @@ package com.Thuba.propertymanagement.controller;
 
 
 import com.Thuba.propertymanagement.dto.ContactRequest;
-import com.Thuba.propertymanagement.service.EmailService;
+import com.Thuba.propertymanagement.service.ContactService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:3000")
 public class ContactController {
 
-    private final EmailService emailService;
+    private final ContactService emailService;
 
-    public ContactController(EmailService emailService) {
+    public ContactController(ContactService emailService) {
         this.emailService = emailService;
     }
 

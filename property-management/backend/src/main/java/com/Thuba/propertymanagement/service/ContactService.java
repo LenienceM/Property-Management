@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Slf4j //  robust Spring Boot logging
 @Service
 @RequiredArgsConstructor
-public class EmailService {
+public class ContactService {
 
     private final JavaMailSender mailSender;
 
