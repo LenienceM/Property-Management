@@ -16,23 +16,23 @@ public class ContactService {
 
     public void sendContactNotification(ContactRequest request) {
         try {
-            log.info("▶️ ATTEMPTING TO SEND EMAIL TO admin@pelicanproperties.co.za...");
+            log.info("ATTEMPTING TO SEND EMAIL TO admin@pelicanproperties.co.za...");
 
             SimpleMailMessage message = buildMessage(request);
 
             mailSender.send(message);
-            log.info("✅ EMAIL SENT SUCCESSFULLY!");
+            log.info("EMAIL SENT SUCCESSFULLY!");
 
         } catch (Exception e) {
             // This logs the exact error safely to Render's logging system
-            log.error("❌ CRITICAL ERROR: EMAIL FAILED TO SEND!", e);
+            log.error("ERROR: EMAIL FAILED TO SEND!", e);
             throw new RuntimeException(String.format("Email failed: %s", e.getMessage()));
         }
     }
 
     private SimpleMailMessage buildMessage(ContactRequest request) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo("admin@pelicanproperties.co.za");
+        message.setTo("lenience.moyo@gmail.com");
 
 
         message.setSubject(String.format("New Website Lead: %s", request.inquiryType()));
