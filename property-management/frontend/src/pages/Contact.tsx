@@ -7,7 +7,7 @@ export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    service: "General Inquiry",
+   inquiryType: "General Inquiry",
     message: "",
   });
 
@@ -95,8 +95,8 @@ export default function Contact() {
                 {/* Service Selection */}
                 <select
                   className="w-full border border-gray-300 p-4 rounded focus:border-[#C9A24D] outline-none bg-white text-gray-500"
-                  value={formData.service}
-                  onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                  value={formData.inquiryType}
+                  onChange={(e) => setFormData({ ...formData, inquiryType: e.target.value })}
                   disabled={isSubmitting}
                 >
                   <option>General Inquiry</option>
