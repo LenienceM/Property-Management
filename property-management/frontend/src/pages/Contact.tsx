@@ -33,7 +33,7 @@ export default function Contact() {
       if (response.ok) {
         setSubmitStatus("success");
         // Clear the form after successful submission
-        setFormData({ name: "", email: "", service: "General Inquiry", message: "" });
+        setFormData({ name: "", email: "", inquiryType: "General Inquiry", message: "" });
       } else {
         setSubmitStatus("error");
       }
