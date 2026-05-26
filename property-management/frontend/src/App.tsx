@@ -1,5 +1,3 @@
-
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import {Navbar} from "./components/layout/Navbar";
 import Properties from "./pages/Properties";
@@ -11,6 +9,7 @@ import { AdminRoute } from "./routes/AdminRoute";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ScrollToTop from "./components/layout/ScrollToTop";
+import Dashboard from "./pages/Dashboard";
 
 export default function App() {
   return (
@@ -28,7 +27,7 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
+        
       {/* Admin-only add property page */}
       <Route
         path="/properties/add"
@@ -37,6 +36,15 @@ export default function App() {
             <AddProperty />
           </AdminRoute>
         }
+      />
+
+      <Route 
+        path="/dashboard" 
+        element={
+          <AdminRoute>
+              <Dashboard />
+          </AdminRoute>
+       } 
       />
 
 
