@@ -13,14 +13,21 @@ export default function Dashboard() {
         const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
         const token = localStorage.getItem("token");
 
-        const response = await fetch(`${API_BASE_URL}/properties/admin?statuses=ACTIVE&statuses=ARCHIVED&page=0&size=20`, {
+        // Fetch a large size (e.g., 1000) so the dashboard can calculate 
+        // accurate global stats for Total Properties and Active Listings locally
+        const response = await fetch(`${API_BASE_URL}/properties/admin?statuses=ACTIVE&statuses=ARCHIVED&page=0&size=1000`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
         if (!response.ok) throw new Error("Failed to fetch properties");
         
         const data = await response.json();
-        setProperties(data.content || data); // Unpack the 'content' array from the page response
+        const rawProperties: Property[] = data.content || data; // Unpack the 'content' array from the page response
+        
+        // Deduplicate properties by ID to handle potential backend Cartesian product (duplicate items from joins)
+        const uniqueProperties = Array.from(new Map(rawProperties.map(p => [p.id, p])).values());
+
+        setProperties(uniqueProperties);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
