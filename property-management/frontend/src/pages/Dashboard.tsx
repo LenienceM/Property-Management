@@ -11,12 +11,16 @@ export default function Dashboard() {
     const fetchProperties = async () => {
       try {
         const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
-        const response = await fetch(`${API_BASE_URL}/properties`);
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`${API_BASE_URL}/properties/admin?statuses=ACTIVE&statuses=ARCHIVED&page=0&size=20`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         
         if (!response.ok) throw new Error("Failed to fetch properties");
         
         const data = await response.json();
-        setProperties(data);
+        setProperties(data.content || data); // Unpack the 'content' array from the page response
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -54,6 +58,7 @@ export default function Dashboard() {
         </div>
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium">New Inquiries</h3>
+          {/* Note: This is still static data! You will need to build and fetch an inquiries endpoint. */}
           <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
         </div>
       </div>
