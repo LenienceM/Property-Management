@@ -29,15 +29,25 @@ export function Navbar() {
       </NavLink>
 
       {auth.isAdmin() && (
-        <NavLink
-          to="/properties/add"
-          onClick={() => setIsOpen(false)}
-          className="px-3 py-1 bg-[#C9A24D] text-black rounded font-semibold"
-        >
-          + Add Property
-        </NavLink>
+        <>
+          <NavLink 
+            to="/dashboard" 
+            onClick={() => setIsOpen(false)}
+            className="hover:text-[#C9A24D] transition-colors"
+          >
+            Dashboard
+          </NavLink>
+          
+          <NavLink
+            to="/properties/add"
+            onClick={() => setIsOpen(false)}
+            className="px-3 py-1 bg-[#C9A24D] text-black rounded font-semibold"
+          >
+            + Add Property
+          </NavLink>
+        </>
       )}
-
+      
       {!auth.isAuthenticated() ? (
         <NavLink
           to="/login"
