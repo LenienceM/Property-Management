@@ -29,7 +29,7 @@ export default function Dashboard() {
 
   // Dynamically calculate stats directly from the database response
   const totalProperties = properties.length;
-  const activeListings = properties.filter(p => p.status === 'AVAILABLE').length;
+  const activeListings = properties.filter(p => p.status === 'ACTIVE').length;
 
   return (
     <DashboardLayout>
@@ -100,7 +100,7 @@ export default function Dashboard() {
                     <td className="p-4 text-gray-900 font-medium">R {property.price.toLocaleString()}</td>
                     <td className="p-4">
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        property.status === 'AVAILABLE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        property.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                       }`}>
                         {property.status}
                       </span>
