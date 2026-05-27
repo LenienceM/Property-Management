@@ -88,9 +88,14 @@ public class PropertyService {
         repo.deleteById(id);
     }
 
-    public Page<Property> getPropertiesByStatus(List<PropertyStatus> statuses, Pageable pageable) {
+   /* public Page<Property> getPropertiesByStatus(List<PropertyStatus> statuses, Pageable pageable) {
         return repo.findByStatusIn(statuses, pageable);
+    }*/
+    //
+    public Page<PropertyDto> getPropertiesByStatus(List<PropertyStatus> statuses, Pageable pageable) {
+        return repo.findByStatusIn(statuses, pageable).map(this::toDto);
     }
+
 
     @Transactional
     public PropertyDto uploadPropertyImage(List<MultipartFile> files, Long propertyId) throws IOException {
