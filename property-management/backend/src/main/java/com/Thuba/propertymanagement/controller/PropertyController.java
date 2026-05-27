@@ -99,7 +99,7 @@ public class PropertyController {
             @RequestParam List<PropertyStatus> statuses,
             Pageable pageable) {
 
-        return service.getPropertiesByStatus(statuses, pageable).map(service::toDto);
+        return service.getPropertiesByStatus(statuses, pageable);
     }
 
     // Submit the description and get a Ticket (Job ID)
