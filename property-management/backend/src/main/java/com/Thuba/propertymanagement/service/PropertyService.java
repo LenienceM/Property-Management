@@ -141,4 +141,8 @@ public class PropertyService {
         );
         return dto;
     }
+
+    public List<String> getDistinctActiveSuburbs() {
+        return repo.findDistinctActiveSuburbs();
+    }
 }

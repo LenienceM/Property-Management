@@ -7,6 +7,7 @@ import com.Thuba.propertymanagement.service.PropertyService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -151,5 +152,11 @@ public class PropertyController {
                 "status", "COMPLETED",
                 "data", result
         ));
+    }
+
+    @GetMapping("/suburbs")
+    @Cacheable("suburbs")
+    public ResponseEntity<List<String>> getActiveSuburbs() {
+        return ResponseEntity.ok(service.getDistinctActiveSuburbs());
     }
 }
