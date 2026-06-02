@@ -157,6 +157,8 @@ export default function Properties() {
             setSuburb={setSuburb}
             bedrooms={bedrooms}
             setBedrooms={setBedrooms}
+            bathrooms={bathrooms}
+            setBathrooms={setBathrooms}
             priceRange={priceRange}
             setPriceRange={setPriceRange}
             sort={sort}
