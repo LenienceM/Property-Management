@@ -20,7 +20,6 @@ export default function FilterBar({
   setSuburb,
   bedrooms,
   setBedrooms,
-  // Destructure the new props
   bathrooms,
   setBathrooms,
   priceRange,
@@ -37,7 +36,7 @@ export default function FilterBar({
       try {
         // Use the new endpoint to get a clean list for the dropdown
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/properties/suburbs`
+          `${import.meta.env.VITE_API_URL}/properties/suburbs`
         );
         if (response.ok) {
           const data = await response.json();
@@ -49,7 +48,7 @@ export default function FilterBar({
     };
 
     fetchSuburbs();
-  }, []); // The empty array [] ensures this runs only once
+  }, []); // The empty array [] to ensure this runs only once
 
   return (
     <div className="bg-white shadow-md -mt-12 relative z-20 rounded-xl p-4">
@@ -121,7 +120,7 @@ export default function FilterBar({
           onClick={() => {
             setSuburb("");
             setBedrooms("");
-            setBathrooms(""); // Also clear the new bathrooms filter
+            setBathrooms(""); 
             setPriceRange("");
             setSort("");
           }}

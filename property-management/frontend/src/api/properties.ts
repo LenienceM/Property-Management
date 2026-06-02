@@ -7,9 +7,10 @@ type PropertyQuery = {
   size?: number;
   suburb?: string;
   bedrooms?: number;
+  bathrooms?: number;
   minPrice?: number;
   maxPrice?: number;
-  sort?: string; // e.g. "price,asc"
+  sort?: string; 
 };
 
 export async function getProperties(query: PropertyQuery = {}) {

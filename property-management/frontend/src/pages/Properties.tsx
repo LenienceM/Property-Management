@@ -29,6 +29,7 @@ export default function Properties() {
   const [priceRange, setPriceRange] = useState("");
   //const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("");
+  const [bathrooms, setBathrooms] = useState(""); 
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
   const priceRanges: Record<
     string,
@@ -65,6 +66,7 @@ export default function Properties() {
         size: 6,
         suburb: suburb ? suburb.trim().toLowerCase() : undefined,
         bedrooms: bedrooms ? Number(bedrooms) : undefined,
+        bathrooms: bathrooms ? Number(bathrooms) : undefined, 
         minPrice: min,
         maxPrice: max,
         sort: sort || undefined,
@@ -75,12 +77,12 @@ export default function Properties() {
         })
         .catch(() => setLoading(false));
     }
-  }, [page, status, suburb, bedrooms, priceRange, sort]);
+  }, [page, status, suburb, bedrooms, bathrooms, priceRange, sort]);
 
   // Reset page when filters change
   useEffect(() => {
     setPage(0);
-  }, [suburb, bedrooms, priceRange, sort]);
+  }, [suburb, bedrooms, bathrooms, priceRange, sort]);
 
   // Admin actions
   const handleDelete = async (id: number) => {
