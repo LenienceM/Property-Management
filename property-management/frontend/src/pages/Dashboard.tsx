@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../components/layout/DashboardLayout";
-import { Property } from "../types/Property"; 
+import type { Property } from "../types/Property"; 
 
 export default function Dashboard() {
   const [properties, setProperties] = useState<Property[]>([]);
