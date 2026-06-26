@@ -147,11 +147,11 @@ export default function Properties() {
           </NavLink>
         )}
       </SectionHeader>
-
+      
       {/* Filter Section */}
-      <div className="relative">
-        <div className="absolute left-0 right-0 -top-10 z-20">
-
+      <Container>
+        {/* We use negative margin instead of absolute so it pushes content down on mobile */}
+        <div className="relative z-20 -mt-10">
           <FilterBar
             suburb={suburb}
             setSuburb={setSuburb}
@@ -164,31 +164,32 @@ export default function Properties() {
             sort={sort}
             setSort={setSort}
           />
-
           {auth.isAdmin() && <AdminToggle status={status} setStatus={setStatus} />}
-
         </div>
-      </div>
+      </Container>
 
       {/* Properties Grid */}
       <Container>
-        {loading ? (
-          <p className="text-center py-20 text-gray-500">Loading properties...</p>
-        ) : data?.content.length === 0 ? (
-          <p className="text-center py-20 text-gray-500">No properties found.</p>
-        ) : (
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {data?.content.map((p) => (
-              <PropertyCard
-                key={p.id}
-                property={p}
-                onDelete={auth.isAdmin() ? handleDelete : undefined}
-                onArchive={auth.isAdmin() ? handleArchive : undefined}
-                onRestore={auth.isAdmin() ? handleRestore : undefined}
-              />
-            ))}
-          </div>
-        )}
+        {/* Added a container wrapper with pt-8 to give breathing room under the filters */}
+        <div className="pt-8">
+          {loading ? (
+            <p className="text-center py-20 text-gray-500 font-medium">Loading properties...</p>
+          ) : data?.content.length === 0 ? (
+            <p className="text-center py-20 text-gray-500">No properties found.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {data?.content.map((p) => (
+                <PropertyCard
+                  key={p.id}
+                  property={p}
+                  onDelete={auth.isAdmin() ? handleDelete : undefined}
+                  onArchive={auth.isAdmin() ? handleArchive : undefined}
+                  onRestore={auth.isAdmin() ? handleRestore : undefined}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Pagination */}
 

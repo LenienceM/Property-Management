@@ -51,7 +51,7 @@ export default function FilterBar({
   }, []); // The empty array [] to ensure this runs only once
 
   return (
-    <div className="bg-white shadow-md -mt-12 relative z-20 rounded-xl p-4">
+    <div className="bg-white shadow-md rounded-xl p-4">
       <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         {/* 3. Changed from a text input to a dropdown for better UX */}
         <select
