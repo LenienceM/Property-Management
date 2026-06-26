@@ -92,6 +92,8 @@ public class PropertyService {
         return repo.findByStatusIn(statuses, pageable);
     }
 
+    // 1. Evicting the cache so findById displays the new images immediately
+    @CacheEvict(value = "properties", key = "#propertyId")
     @Transactional
     public PropertyDto uploadPropertyImage(List<MultipartFile> files, Long propertyId) throws IOException {
         Property property = findEntity(propertyId);
@@ -101,10 +103,12 @@ public class PropertyService {
             String key = String.format("properties/%d/%s-%s",
                     propertyId, UUID.randomUUID(), file.getOriginalFilename());
 
+            // 2. Optimize for Download: Add Cache-Control metadata (1 year = 31536000 seconds)
             PutObjectRequest putRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .contentType(file.getContentType())
+                    .cacheControl("public, max-age=31536000, immutable") // Browser caches this forever
                     .build();
 
             s3Client.putObject(putRequest,
@@ -141,7 +145,7 @@ public class PropertyService {
         );
         return dto;
     }
-
+    @Cacheable("suburbs")
     public List<String> getDistinctActiveSuburbs() {
         return repo.findDistinctActiveSuburbs();
     }

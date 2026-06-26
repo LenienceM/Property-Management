@@ -155,7 +155,7 @@ public class PropertyController {
     }
 
     @GetMapping("/suburbs")
-    @Cacheable("suburbs")
+    //@Cacheable("suburbs")
     public ResponseEntity<List<String>> getActiveSuburbs() {
         return ResponseEntity.ok(service.getDistinctActiveSuburbs());
     }

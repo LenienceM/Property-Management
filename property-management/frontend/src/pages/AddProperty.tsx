@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Container from "../components/layout/Container";
+import imageCompression from "browser-image-compression";
 
 
 export default function AddProperty() {
@@ -82,6 +83,39 @@ export default function AddProperty() {
       alert("Failed to get AI suggestions");
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const handleImageSelection = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length === 0) return;
+
+    const compressionOptions = {
+      maxSizeMB: 0.5, // Max file size in MB (500 KB)
+      maxWidthOrHeight: 1920, // Max dimension
+      useWebWorker: true, // Speeds up compression by using background threads
+    };
+
+    try {
+      const compressedFiles = await Promise.all(
+        files.map(async (file) => {
+          // Compress the file
+          const compressedBlob = await imageCompression(file, compressionOptions);
+          // Convert the Blob back into a File object so your backend doesn't complain
+          return new File([compressedBlob], file.name, {
+            type: compressedBlob.type,
+            lastModified: Date.now(),
+          });
+        })
+      );
+      
+      setImages(compressedFiles);
+    } catch (error) {
+      console.error("Error compressing images:", error);
+      // Fallback: if compression fails for some reason, just use the original files
+      setImages(files);
+    } finally {
+      // setIsCompressing(false);
     }
   };
 
@@ -231,7 +265,7 @@ return (
           {aiLoading ? "Thinking..." : "Generate AI Amenities"}
         </button>       
          
-         {/* THE MAGIC SAUCE: Helper text that only shows while loading */}
+         {/* Helper text that only shows while loading */}
           {aiLoading && (
             <p className="text-xs text-center text-gray-500 mt-2">
               Feel free to upload your gallery images while we generate this!
@@ -292,7 +326,13 @@ return (
           <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
         <h2 className="text-lg font-semibold text-gray-800">Gallery</h2>
         <div className="border-2 border-dashed border-gray-300 p-4 rounded text-center">
-          <input type="file" accept="image/*" multiple onChange={(e) => setImages(e.target.files ? Array.from(e.target.files) : [])} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-[#C9A24D] file:text-black hover:file:bg-[#B79424]" />
+ <input 
+  type="file" 
+  accept="image/*" 
+  multiple 
+  onChange={handleImageSelection} 
+  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-[#C9A24D] file:text-black hover:file:bg-[#B79424]" 
+/>
         </div>
       </div>
 
