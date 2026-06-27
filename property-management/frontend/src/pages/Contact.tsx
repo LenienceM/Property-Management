@@ -75,8 +75,9 @@ export default function Contact() {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <input
+                  
                   required
-                  className="w-full border border-gray-300 p-4 rounded focus:border-[#C9A24D] outline-none"
+                  aria-label="Your Name"
                   placeholder="Your Name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -132,22 +133,27 @@ export default function Contact() {
             <div className="space-y-8">
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Office</h3>
-                <p className="text-gray-700">Sandton, Johannesburg</p>
+                <p className="text-gray-700">Randburg, Johannesburg</p>
                 <p className="text-gray-700">South Africa</p>
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Email</h3>
-                <p className="text-[#C9A24D]">moyolenience@gmail.com</p>
+                
+                <a href="mailto:info@pelicanproperties.co.za" className="text-[#C9A24D] hover:underline">
+                    info@pelicanproperties.co.za
+                </a>
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Professional Support</h3>
-                <p className="text-gray-700">+27838902160</p>
+                <a href="tel:+27719756730" className="text-gray-700 hover:text-[#C9A24D] transition">
+                   +27 71 975 6730
+              </a>
                 <p className="text-sm text-gray-500 mt-2">Available: Mon - Fri, 08:00 - 17:00</p>
               </div>
 
               <div className="pt-6 border-t border-gray-200">
                 <p className="text-sm italic text-gray-600">
-                  "Relieving property owners of the burdens associated with property management."
+                  Relieving property owners of the burdens associated with property management.
                 </p>
               </div>
             </div>

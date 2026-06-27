@@ -2,6 +2,7 @@
 import heroImage from "../utils/background.avif";
 import SectionHeader from "../components/ui/SectionHeader";
 import Container from "../components/layout/Container";
+import { CheckCircle2 } from "lucide-react";
 
 export default function About() {
   return (
@@ -51,15 +52,30 @@ export default function About() {
 
           {/* Services Section */}
           <section className="bg-gray-50 p-8 rounded-xl">
-            <h2 className="text-2xl font-bold mb-6">Our Services Include:</h2>
-            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
-              <li className="flex items-center gap-2">✔ Property Sales</li>
-              <li className="flex items-center gap-2">✔ Property Rentals</li>
-              <li className="flex items-center gap-2">✔ Property Buying Assistance</li>
-              <li className="flex items-center gap-2">✔ Property Management</li>
-              <li className="flex items-center gap-2">✔ Property Maintenance & Compliance</li>
-            </ul>
-          </section>
+  <h2 className="text-2xl font-bold mb-6">Our Services Include:</h2>
+  <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
+    <li className="flex items-center gap-2">
+      <CheckCircle2 className="w-5 h-5 text-[#C9A24D]" /> 
+      Property Sales
+    </li>
+    <li className="flex items-center gap-2">
+      <CheckCircle2 className="w-5 h-5 text-[#C9A24D]" /> 
+      Property Rentals
+    </li>
+    <li className="flex items-center gap-2">
+      <CheckCircle2 className="w-5 h-5 text-[#C9A24D]" /> 
+      Property Buying Assistance
+    </li>
+    <li className="flex items-center gap-2">
+      <CheckCircle2 className="w-5 h-5 text-[#C9A24D]" /> 
+      Property Management
+    </li>
+    <li className="flex items-center gap-2">
+      <CheckCircle2 className="w-5 h-5 text-[#C9A24D]" /> 
+      Property Maintenance & Compliance
+    </li>
+  </ul>
+</section>
 
           {/* Final Statement */}
           <p className="text-center text-gray-600 italic pb-10">
