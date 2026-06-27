@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../api/auth";
+import PageLayout from "../components/layout/PageLayout";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -25,6 +26,7 @@ export default function Login() {
   };
 
   return (
+       <PageLayout>
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form
         onSubmit={handleSubmit}
@@ -60,5 +62,6 @@ export default function Login() {
         </button>
       </form>
     </div>
+       </PageLayout>
   );
 }

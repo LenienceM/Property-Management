@@ -15,7 +15,7 @@ export default function App() {
   return (
 
     <>
-   <Navbar/>   
+
     <ScrollToTop/> 
     <Routes>
       {/* Default landing page */}

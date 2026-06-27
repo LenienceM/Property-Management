@@ -3,9 +3,11 @@ import heroImage from "../utils/background.avif";
 import SectionHeader from "../components/ui/SectionHeader";
 import Container from "../components/layout/Container";
 import { CheckCircle2 } from "lucide-react";
+import PageLayout from "../components/layout/PageLayout";
 
 export default function About() {
   return (
+       <PageLayout>
     <div className="min-h-screen bg-white">
       {/* Hero */}
       <SectionHeader
@@ -85,5 +87,6 @@ export default function About() {
         </div>
       </Container>
     </div>
+       </PageLayout>
   );
 }

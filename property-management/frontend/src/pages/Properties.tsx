@@ -11,7 +11,7 @@ import Container from "../components/layout/Container";
 import SectionHeader from "../components/ui/SectionHeader";
 import FilterBar from "../components/ui/FilterBar";
 import AdminToggle from "../components/ui/AdminToggle";
-import PageLayout from "../components/layout/PageLayout"; // <-- 1. Imported PageLayout
+import PageLayout from "../components/layout/PageLayout"; 
 
 type PageResponse<T> = {
   content: T[];

@@ -2,6 +2,7 @@ import { useState } from "react";
 import SectionHeader from "../components/ui/SectionHeader";
 import Container from "../components/layout/Container";
 import heroImage from "../utils/background.avif";
+import PageLayout from "../components/layout/PageLayout"; 
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -46,6 +47,7 @@ export default function Contact() {
   };
 
   return (
+       <PageLayout>
     <div className="min-h-screen bg-white">
       {/* Hero */}
       <SectionHeader
@@ -161,5 +163,6 @@ export default function Contact() {
         </Container>
       </div>
     </div>
+       </PageLayout>
   );
 }
