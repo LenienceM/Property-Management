@@ -1,4 +1,4 @@
-export default function Footer() {
+export default function PageFooter() {
   return (
     <footer className="w-full py-8 mt-12 border-t border-gray-200 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center space-y-2">
