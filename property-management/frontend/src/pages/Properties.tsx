@@ -11,6 +11,7 @@ import Container from "../components/layout/Container";
 import SectionHeader from "../components/ui/SectionHeader";
 import FilterBar from "../components/ui/FilterBar";
 import AdminToggle from "../components/ui/AdminToggle";
+import PageLayout from "../components/layout/PageLayout"; // <-- 1. Imported PageLayout
 
 type PageResponse<T> = {
   content: T[];
@@ -25,9 +26,7 @@ export default function Properties() {
   const [status, setStatus] = useState<PropertyStatus>(PropertyStatus.ACTIVE);
   const [suburb, setSuburb] = useState("");
   const [bedrooms, setBedrooms] = useState("");
-  //const [minPrice, setMinPrice] = useState("");
   const [priceRange, setPriceRange] = useState("");
-  //const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("");
   const [bathrooms, setBathrooms] = useState(""); 
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
@@ -131,92 +130,90 @@ export default function Properties() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero */}
-      <SectionHeader
-        title="Our Properties"
-        subtitle="Discover homes and investment opportunities curated for quality living."
-        backgroundImage={heroImage}
-      >
-        {auth.isAdmin() && (
-          <NavLink
-            to="/properties/add"
-            className="px-6 py-3 bg-[#C9A24D] text-black rounded-lg font-semibold hover:bg-[#B79424]"
-          >
-            + Add Property
-          </NavLink>
-        )}
-      </SectionHeader>
-      
-      {/* Filter Section */}
-      <Container>
-        {/* We use negative margin instead of absolute so it pushes content down on mobile */}
-        <div className="relative z-20 -mt-10">
-          <FilterBar
-            suburb={suburb}
-            setSuburb={setSuburb}
-            bedrooms={bedrooms}
-            setBedrooms={setBedrooms}
-            bathrooms={bathrooms}
-            setBathrooms={setBathrooms}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            sort={sort}
-            setSort={setSort}
-          />
-          {auth.isAdmin() && <AdminToggle status={status} setStatus={setStatus} />}
-        </div>
-      </Container>
+    // 2. Wrapped the entire page in PageLayout
+    <PageLayout>
+      <div className="bg-white pb-20">
+        {/* Hero */}
+        <SectionHeader
+          title="Our Properties"
+          subtitle="Discover homes and investment opportunities curated for quality living."
+          backgroundImage={heroImage}
+        >
+          {auth.isAdmin() && (
+            <NavLink
+              to="/properties/add"
+              className="px-6 py-3 bg-[#C9A24D] text-black rounded-lg font-semibold hover:bg-[#B79424]"
+            >
+              + Add Property
+            </NavLink>
+          )}
+        </SectionHeader>
+        
+        {/* Filter Section */}
+        <Container>
+          <div className="relative z-20 -mt-10">
+            <FilterBar
+              suburb={suburb}
+              setSuburb={setSuburb}
+              bedrooms={bedrooms}
+              setBedrooms={setBedrooms}
+              bathrooms={bathrooms}
+              setBathrooms={setBathrooms}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              sort={sort}
+              setSort={setSort}
+            />
+            {auth.isAdmin() && <AdminToggle status={status} setStatus={setStatus} />}
+          </div>
+        </Container>
 
-      {/* Properties Grid */}
-      <Container>
-        {/* Added a container wrapper with pt-8 to give breathing room under the filters */}
-        <div className="pt-8">
-          {loading ? (
-            <p className="text-center py-20 text-gray-500 font-medium">Loading properties...</p>
-          ) : data?.content.length === 0 ? (
-            <p className="text-center py-20 text-gray-500">No properties found.</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {data?.content.map((p) => (
-                <PropertyCard
-                  key={p.id}
-                  property={p}
-                  onDelete={auth.isAdmin() ? handleDelete : undefined}
-                  onArchive={auth.isAdmin() ? handleArchive : undefined}
-                  onRestore={auth.isAdmin() ? handleRestore : undefined}
-                />
-              ))}
+        {/* Properties Grid */}
+        <Container>
+          <div className="pt-8">
+            {loading ? (
+              <p className="text-center py-20 text-gray-500 font-medium">Loading properties...</p>
+            ) : data?.content?.length === 0 ? (
+              <p className="text-center py-20 text-gray-500">No properties found.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {data?.content?.map((p) => (
+                  <PropertyCard
+                    key={p.id}
+                    property={p}
+                    onDelete={auth.isAdmin() ? handleDelete : undefined}
+                    onArchive={auth.isAdmin() ? handleArchive : undefined}
+                    onRestore={auth.isAdmin() ? handleRestore : undefined}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {(data?.totalPages ?? 0) > 1 && (
+            <div className="flex justify-center items-center gap-6 mt-10">
+              <button
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+                className="px-5 py-2 border rounded disabled:opacity-40 hover:bg-[#C9A24D] hover:text-white transition"
+              >
+                Previous
+              </button>
+              <span className="text-gray-600">
+                Page {data ? data.number + 1 : 1} of {data?.totalPages ?? 1}
+              </span>
+              <button
+                disabled={!data || page + 1 >= (data?.totalPages ?? 0)}
+                onClick={() => setPage((p) => p + 1)}
+                className="px-5 py-2 border rounded disabled:opacity-40 hover:bg-[#C9A24D] hover:text-white transition"
+              >
+                Next
+              </button>
             </div>
           )}
-        </div>
-
-        {/* Pagination */}
-
-        {(data?.totalPages ?? 0) > 1 && (
-          <div className="flex justify-center items-center gap-6 mt-10 pb-20">
-            <button
-              disabled={page === 0}
-              onClick={() => setPage((p) => p - 1)}
-              className="px-5 py-2 border rounded disabled:opacity-40 hover:bg-primary hover:text-white transition"
-            >
-              Previous
-            </button>
-            <span className="text-gray-600">
-              Page {data ? data.number + 1 : 1} of {data?.totalPages ?? 1}
-            </span>
-            <button
-              disabled={!data || page + 1 >= (data?.totalPages ?? 0)}
-
-              // disabled={data? page + 1 >= data?.totalPages : true}
-              onClick={() => setPage((p) => p + 1)}
-              className="px-5 py-2 border rounded disabled:opacity-40 hover:bg-primary hover:text-white transition"
-            >
-              Next
-            </button>
-          </div>
-        )}
-      </Container>
-    </div>
+        </Container>
+      </div>
+    </PageLayout>
   );
 }
