@@ -46,19 +46,10 @@ export default function App() {
           </AdminRoute>
        } 
       />
-
-
       {/* Optional: catch all */}
-      <Route path="*" element={<Navigate to="/properties" replace />} />
-
-   
+      <Route path="*" element={<Navigate to="/properties" replace />} />   
     </Routes>
-
-       </>
-         
-          
-
-   
+       </>            
   );
 }
 

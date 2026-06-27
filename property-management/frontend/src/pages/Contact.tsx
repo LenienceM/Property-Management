@@ -145,12 +145,11 @@ export default function Contact() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Professional Support</h3>
-                <a href="tel:+27719756730" className="text-gray-700 hover:text-[#C9A24D] transition">
+                <a href="tel:+27789620727" className="text-gray-700 hover:text-[#C9A24D] transition">
                    +27 71 975 6730
               </a>
                 <p className="text-sm text-gray-500 mt-2">Available: Mon - Fri, 08:00 - 17:00</p>
               </div>
-
               <div className="pt-6 border-t border-gray-200">
                 <p className="text-sm italic text-gray-600">
                   Relieving property owners of the burdens associated with property management.

@@ -11,7 +11,7 @@ export const getPropertyImageUrl = (propertyId: number, rawPath?: string) => {
     return rawPath;
   }
 
-  // Otherwise, construct it manually using your bucket and region info
+  // Otherwise, constructs it manually using your bucket and region info
   const BUCKET_NAME = "lm-propertymanagement";
   const REGION = "us-east-1";
 

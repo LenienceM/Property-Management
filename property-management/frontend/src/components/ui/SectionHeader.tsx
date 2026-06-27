@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"; // Ensure you use type-only import
+import type { ReactNode } from "react"; //use type-only import
 
 interface Props {
   title: string;
