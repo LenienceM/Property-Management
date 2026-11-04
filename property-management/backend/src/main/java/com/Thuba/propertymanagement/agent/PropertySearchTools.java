@@ -6,6 +6,7 @@ import com.Thuba.propertymanagement.service.PropertyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class PropertySearchTools {
 
 
     @Tool(description = "Search the PostgreSQL database for properties matching exact criteria.")
+    @Transactional(readOnly = true)
     public List<PropertyDto> searchProperties(String suburb, Double maxPrice, Integer minBedrooms) {
 
         String searchSuburb = (suburb != null) ? suburb : "";
