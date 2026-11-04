@@ -16,6 +16,7 @@ public class PropertySearchTools {
     private final PropertyRepository repository;
     private final PropertyService propertyService;
 
+
     @Tool(description = "Search the PostgreSQL database for properties matching exact criteria.")
     public List<PropertyDto> searchProperties(String suburb, Double maxPrice, Integer minBedrooms) {
 
@@ -23,10 +24,11 @@ public class PropertySearchTools {
         Double searchPrice = (maxPrice != null) ? maxPrice : 99999999.0;
         Integer searchBedrooms = (minBedrooms != null) ? minBedrooms : 0;
 
-        return repository.searchByAgenticCriteria(suburb, maxPrice, minBedrooms)
+        // Pass the safe variables here, NOT the original parameters
+        return repository.searchByAgenticCriteria(searchSuburb, searchPrice, searchBedrooms)
                 .stream()
                 .map(propertyService::toDto)
-                .toList(); // .toList() is available in Java 16+
+                .toList();
     }
 
     @Tool(description = "Get a list of adjacent suburbs near a given target suburb. Use this to expand searches if the initial search returns zero results.")
