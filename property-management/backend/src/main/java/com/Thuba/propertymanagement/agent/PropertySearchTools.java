@@ -18,6 +18,11 @@ public class PropertySearchTools {
 
     @Tool(description = "Search the PostgreSQL database for properties matching exact criteria.")
     public List<PropertyDto> searchProperties(String suburb, Double maxPrice, Integer minBedrooms) {
+
+        String searchSuburb = (suburb != null) ? suburb : "";
+        Double searchPrice = (maxPrice != null) ? maxPrice : 99999999.0;
+        Integer searchBedrooms = (minBedrooms != null) ? minBedrooms : 0;
+
         return repository.searchByAgenticCriteria(suburb, maxPrice, minBedrooms)
                 .stream()
                 .map(propertyService::toDto)
