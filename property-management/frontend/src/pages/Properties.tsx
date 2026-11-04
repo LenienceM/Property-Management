@@ -12,6 +12,7 @@ import SectionHeader from "../components/ui/SectionHeader";
 import FilterBar from "../components/ui/FilterBar";
 import AdminToggle from "../components/ui/AdminToggle";
 import PageLayout from "../components/layout/PageLayout"; 
+import AgenticSearch from '../components/property/AgenticSearch';
 
 type PageResponse<T> = {
   content: T[];
@@ -130,7 +131,7 @@ export default function Properties() {
   };
 
   return (
-    // 2. Wrapped the entire page in PageLayout
+    //Wrap the entire page in PageLayout
     <PageLayout>
       <div className="bg-white pb-20">
         {/* Hero */}
@@ -148,6 +149,12 @@ export default function Properties() {
             </NavLink>
           )}
         </SectionHeader>
+
+     <Container>
+  <div className="mt-8 mb-4">
+    <AgenticSearch/>
+  </div>
+</Container>
         
         {/* Filter Section */}
         <Container>

@@ -79,7 +79,20 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
             Pageable pageable
     );
 
-    // New method for fetching a unique, sorted list of active suburbs
+    // method for fetching a unique, sorted list of active suburbs
     @Query("SELECT DISTINCT p.suburb FROM Property p WHERE p.status = 'ACTIVE' AND p.suburb IS NOT NULL ORDER BY p.suburb ASC")
     List<String> findDistinctActiveSuburbs();
+
+    @Query("SELECT p FROM Property p WHERE LOWER(p.suburb) = LOWER(:suburb) AND p.price <= :maxPrice AND p.bedrooms >= :minBedrooms")
+    List<Property> searchByAgenticCriteria(
+            @Param("suburb") String suburb,
+            @Param("maxPrice") Double maxPrice,
+            @Param("minBedrooms") Integer minBedrooms
+    );
+
+    @Query("SELECT AVG(p.price) FROM Property p WHERE LOWER(p.suburb) = LOWER(:suburb) AND p.bedrooms = :bedrooms")
+    Double getAveragePrice(
+            @Param("suburb") String suburb,
+            @Param("bedrooms") Integer bedrooms
+    );
 }

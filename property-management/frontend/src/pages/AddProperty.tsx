@@ -27,7 +27,7 @@ export default function AddProperty() {
     try {
       const token = localStorage.getItem("token");
 
-      // STEP 1: Submit the task and get the Ticket ID (UUID)
+      //Submit the task and get the Ticket ID (UUID)
       const initRes = await fetch(`${API_BASE_URL}/properties/suggest-amenities`, {
         method: "POST",
         headers: {
@@ -75,7 +75,7 @@ export default function AddProperty() {
         // If status is "PENDING", the loop just continues and waits another 2 seconds
       }
 
-      // STEP 3: Update the UI with the final result
+      //Update the UI with the final result
       setSuggestedAmenities(finalAmenities);
 
     } catch (err) {
