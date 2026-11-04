@@ -38,8 +38,11 @@ public class PropertySearchTools {
         return List.of();
     }
 
+
     @Tool(description = "Get the average rental price for a specific suburb and bedroom count to explain unrealistic budgets to the user.")
     public Double getMarketAverage(String suburb, Integer bedrooms) {
-        return repository.getAveragePrice(suburb, bedrooms);
+        String searchSuburb = (suburb != null) ? suburb : "";
+        Integer searchBedrooms = (bedrooms != null) ? bedrooms : 0;
+        return repository.getAveragePrice(searchSuburb, searchBedrooms);
     }
 }
