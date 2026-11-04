@@ -27,6 +27,7 @@ public class AgenticSearchController {
         return chatClient.prompt()
                 .system(systemInstruction)
                 .user(userPrompt)
+                .tools(propertyTools) // Attaches all @Tool methods in the component
                 .tools("propertySearchTools")
                 .call()
                 .content();

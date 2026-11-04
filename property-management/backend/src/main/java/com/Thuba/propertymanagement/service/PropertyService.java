@@ -125,6 +125,15 @@ public class PropertyService {
         return toDto(property);
     }
 
+
+    @Transactional(readOnly = true)
+    public List<PropertyDto> executeAgenticSearch(String suburb, Double maxPrice, Integer minBedrooms) {
+        return repo.searchByAgenticCriteria(suburb, maxPrice, minBedrooms)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     public PropertyDto toDto(Property property) {
         PropertyDto dto = new PropertyDto();
         dto.setId(property.getId());
