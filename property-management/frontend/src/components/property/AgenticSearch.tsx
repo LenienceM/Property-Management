@@ -7,6 +7,7 @@ const AgenticSearch = () => {
     const [response, setResponse] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
     const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -18,9 +19,11 @@ const AgenticSearch = () => {
 
         try 
         {
-            const res = await axios.post('http://localhost:8080/api/properties/search/agentic', {
+            
+const res = await axios.post(`${API_BASE_URL}/properties/search/agentic`, {
                 query: query
             });
+                     
             setResponse(res.data);
         } catch (error) {
             console.error("Error fetching agentic search:", error);

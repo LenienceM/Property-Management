@@ -44,8 +44,12 @@ public class SecurityConfig {
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/properties").permitAll()
                         .requestMatchers("/error").permitAll()
+
                         .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+
+                        .requestMatchers(HttpMethod.POST, "/api/properties/search/agentic").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/properties").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/properties/*/images").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/properties/suggest-amenities").hasRole("ADMIN")
