@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import axios from 'axios';
 
 const AgenticSearch = () => {
@@ -6,16 +6,15 @@ const AgenticSearch = () => {
     const [response, setResponse] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSearch = async (e) => {
+    const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
-        setResponse(''); // Clear previous results
+        setResponse(''); 
 
         try {
             const res = await axios.post('http://localhost:8080/api/properties/search/agentic', {
                 query: query
             });
-            // The backend returns a plain string from the LLM
             setResponse(res.data);
         } catch (error) {
             console.error("Error fetching agentic search:", error);
