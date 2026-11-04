@@ -16,7 +16,8 @@ const AgenticSearch = () => {
         setResponse(''); 
         setIsError(false);
 
-        try {
+        try 
+        {
             const res = await axios.post('http://localhost:8080/api/properties/search/agentic', {
                 query: query
             });
