@@ -7,6 +7,8 @@ const AgenticSearch = () => {
     const [response, setResponse] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
+
+    // 1. Add your dynamic base URL here
     const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
     const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
@@ -17,14 +19,13 @@ const AgenticSearch = () => {
         setResponse(''); 
         setIsError(false);
 
-        try 
-        {
-            
-const res = await axios.post(`${API_BASE_URL}/properties/search/agentic`, {
+        try {
+            // 2. Change the hardcoded localhost string to use the dynamic variable
+            const res = await axios.post(`${API_BASE_URL}/properties/search/agentic`, {
                 query: query
             });
-                     
             setResponse(res.data);
+
         } catch (error) {
             console.error("Error fetching agentic search:", error);
             setIsError(true);
