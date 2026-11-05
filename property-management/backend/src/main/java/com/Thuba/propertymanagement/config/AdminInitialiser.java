@@ -22,7 +22,7 @@ public class AdminInitialiser {
     @PostConstruct
     public void createAdmin() {
 
-        if(userRepository.findByUsername("admin").isEmpty()) {
+      /*  if(userRepository.findByUsername("admin").isEmpty()) {
 
             User admin = new User();
             admin.setUsername("admin");
@@ -33,6 +33,6 @@ public class AdminInitialiser {
             userRepository.save(admin);
 
             System.out.println("Admin user created");
-        }
+        }*/
     }
 }
