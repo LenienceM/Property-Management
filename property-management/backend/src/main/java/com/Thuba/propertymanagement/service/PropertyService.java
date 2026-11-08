@@ -134,6 +134,11 @@ public class PropertyService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Double getMarketAverage(String suburb, Integer bedrooms) {
+        return repo.getAveragePrice(suburb, bedrooms);
+    }
+
     public PropertyDto toDto(Property property) {
         PropertyDto dto = new PropertyDto();
         dto.setId(property.getId());

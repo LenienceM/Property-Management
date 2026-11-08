@@ -1,12 +1,11 @@
 package com.Thuba.propertymanagement.agent;
 
 import com.Thuba.propertymanagement.dto.PropertyDto;
-import com.Thuba.propertymanagement.repository.PropertyRepository;
 import com.Thuba.propertymanagement.service.PropertyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,33 +13,39 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PropertySearchTools {
 
-    private final PropertyRepository repository;
     private final PropertyService propertyService;
 
+    @Tool(description = "Search for available rental properties by suburb, maximum price, and minimum bedroom count.")
+    public List<PropertyDto> searchProperties(
+            @ToolParam(description = "Suburb name. Leave null or empty if the user did not specify a location.") String suburb,
+            @ToolParam(description = "Maximum rental budget. Leave null if no maximum price was specified.") Double maxPrice,
+            @ToolParam(description = "Minimum number of bedrooms. Leave null if not specified.") Integer minBedrooms) {
 
-    @Tool(description = "Search the PostgreSQL database for properties matching exact criteria.")
-    public List<PropertyDto> searchProperties(String suburb, Double maxPrice, Integer minBedrooms) {
-
-        String searchSuburb = (suburb != null) ? suburb : "";
-        Double searchPrice = (maxPrice != null) ? maxPrice : 99999999.0;
+        Double searchPrice = (maxPrice != null) ? maxPrice : Double.MAX_VALUE;
         Integer searchBedrooms = (minBedrooms != null) ? minBedrooms : 0;
 
-        // Call the new service method instead of the repository
-        return propertyService.executeAgenticSearch(searchSuburb, searchPrice, searchBedrooms);
+        return propertyService.executeAgenticSearch(suburb, searchPrice, searchBedrooms);
     }
 
-    @Tool(description = "Get a list of adjacent suburbs near a given target suburb. Use this to expand searches if the initial search returns zero results.")
-    public List<String> getAdjacentSuburbs(String targetSuburb) {
-        if ("Sandton".equalsIgnoreCase(targetSuburb)) return List.of("Morningside", "Woodmead", "Paulshof");
-        if ("Woodmead".equalsIgnoreCase(targetSuburb)) return List.of("Sunninghill", "Paulshof", "Sandton");
-        return List.of();
+    @Tool(description = "Get a list of adjacent suburbs near a given target suburb to expand the search when no results are found.")
+    public List<String> getAdjacentSuburbs(
+            @ToolParam(description = "The target suburb to find neighbors for.") String targetSuburb) {
+        if (targetSuburb == null) return List.of();
+
+        return switch (targetSuburb.trim().toLowerCase()) {
+            case "sandton" -> List.of("Morningside", "Woodmead", "Paulshof");
+            case "woodmead" -> List.of("Sunninghill", "Paulshof", "Sandton");
+            case "morningside" -> List.of("Sandton", "River Club", "Bryanston");
+            default -> List.of();
+        };
     }
 
-
-    @Tool(description = "Get the average rental price for a specific suburb and bedroom count to explain unrealistic budgets to the user.")
-    public Double getMarketAverage(String suburb, Integer bedrooms) {
-        String searchSuburb = (suburb != null) ? suburb : "";
+    @Tool(description = "Get the average rental price for active properties in a specific suburb and bedroom count.")
+    public Double getMarketAverage(
+            @ToolParam(description = "The suburb name.") String suburb,
+            @ToolParam(description = "The number of bedrooms.") Integer bedrooms) {
+        if (suburb == null || suburb.isBlank()) return null;
         Integer searchBedrooms = (bedrooms != null) ? bedrooms : 0;
-        return repository.getAveragePrice(searchSuburb, searchBedrooms);
+        return propertyService.getMarketAverage(suburb, searchBedrooms);
     }
 }
